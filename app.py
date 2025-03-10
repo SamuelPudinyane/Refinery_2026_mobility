@@ -4,7 +4,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        get_all_operators,insert_into_checklist_questions,get_all_questions,delete_selected_questions,get_one_question,
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
-                        get_operator_with_id,insert_question
+                        get_operator_with_id,insert_question,get_all_questions_by_company_number
                        )
 from datetime import datetime
 import json
@@ -118,7 +118,6 @@ def master_view():
 def admin_create_question():
 
     user=session['user']
-    print(user)
     plant_sections=[]
     found_admin=get_administrator_with_id(user['id'])
     if not found_admin:
@@ -155,6 +154,7 @@ def admin_delete_question():
     user=session['user']
     plant_sections=[]
     found_admin=get_administrator_with_id(user['id'])
+   
     if not found_admin:
         flash("you are currently not assigned to any plant section")
         return redirect(url_for('login'))
@@ -162,9 +162,9 @@ def admin_delete_question():
        
         for item in found_admin:
             plant_sections.append(item['plant_section'])
-    
+           
             questions=get_all_questions(item['plant_section'])
-    
+            
     if request.method=="POST":
         if request.is_json:
             data = request.get_json()
@@ -330,16 +330,16 @@ def operator():
         session['user_lon'] = user_lon
 
         # Get the target location and range
-        questions = get_all_questions(user['company_number'])
+        questions = get_all_questions_by_company_number(user['company_number'])
         location = json.loads(questions[0]['location'])
         target_location = location[0]
-        # target={"latitude":-26.248538,"longitude":27.854032,"range":2}
+        target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
         # Check if the user is within range
         is_within = is_within_range(
             str(user_lat), str(user_lon),
-            target_location['latitude'], target_location['longitude'],
-            target_location['range']
+            target['latitude'], target['longitude'],
+            target['range']
         )
 
         # Prepare the response
@@ -357,7 +357,7 @@ def operator():
         return jsonify(response_data)
 
     # For GET requests, render the template
-    questions = get_all_questions(user['company_number'])
+    questions = get_all_questions_by_company_number(user['company_number'])
     questions = json.loads(questions[0]['checklist_questions'])
 
     return render_template('operator.html', operators_questions=questions)

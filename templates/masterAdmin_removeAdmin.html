@@ -3,60 +3,67 @@
 {% block title %}REMOVE ADMINISTRATORS{% endblock %}
 
 {% block sidebar %}
-    <div class="container-fluid add-admin  text-center py-3">
-        <a href="{{ url_for('master_add') }}" class="btn btn-success btn-sm my-1">ADD ADMINISTRATORS</a>
-        <a href="{{ url_for('master_remove') }}" class="btn btn-secondary btn-sm my-1">REMOVE ADMINISTRATORS</a>
-        <a href="{{ url_for('master_view') }}" class="btn btn-success btn-sm my-1">VIEW ADMINISTRATORS</a>
-    </div>
+<div class="container-fluid add-admin text-center py-3">
+  <a href="{{ url_for('master_add') }}" class="btn btn-success btn-sm my-1">
+      <i class="fas fa-user-plus me-2"></i>ADD ADMINISTRATORS
+  </a>
+  <a href="{{ url_for('master_remove') }}" class="btn btn-secondary btn-sm my-1" data-bs-toggle="tooltip" title="Remove administrators">
+    <i class="fas fa-user-minus me-2"></i>REMOVE ADMINISTRATORS
+</a>
+  <a href="{{ url_for('master_view') }}" class="btn btn-success btn-sm my-1">
+      <i class="fas fa-users me-2"></i>VIEW ADMINISTRATORS
+  </a>
+</div>
 {% endblock %}
 
 {% block content %}
     <div class="container">
         <h2 class="text-center my-3">REMOVE ADMINISTRATOR</h2>
         <div class="p-3">
-            <form class="form-control" action="/master_remove" method="POST">
+          <form class="form-control" action="/master_remove" method="POST">
+            <!-- Select Section with Icon -->
+            <div class="mb-3">
                 <label class="form-label">Select Section</label>
-                <select class="form-select" name="section" id="section">
-                    <option value="">-- Select Section --</option>
-                    {% if plant_section %}
-                  {% for item in plant_section%}
-                  <option value="{{item.plant_section | upper}}">{{item.plant_section | upper}}</option>
-                  {% endfor%}
-                  {% endif %}
-                </select>
-                
-                <div class="card myBlock mt-3">
-                    <div class="card-body">
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        
-                        <div id="flash-message-container">
-                            {% for category, message in messages %}
-                              <div class="alert alert-{{ category }}" role="alert">
-                                {{ message }}
-                              </div>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-building"></i>
+                    </span>
+                    <select class="form-select" name="section" id="section">
+                        <option value="">-- Select Section --</option>
+                        {% if plant_section %}
+                            {% for item in plant_section %}
+                                <option value="{{ item.plant_section | upper }}">{{ item.plant_section | upper }}</option>
                             {% endfor %}
-                          </div>
-                       
-                    {% endif %}
-                {% endwith %}
-                        <ul class="list-unstyled">
-                            {% if administrator %}
-                          {% for item in administrator %}
-                          <li>
-                            <input type="checkbox" class="form-check-input" id="{{ item.id }}" name="selected_admins[]" value="{{item.id}},{{ item.company_number |upper }}-{{ item.name |upper }}">
-                            <label class="form-check-label" for="{{ item.id }}">{{ item.company_number |upper}} - {{ item.name |upper }}</label>
-                        </li>  
-                          {% endfor %}
-                          {% else %}
-                          <p>There are no Administrators registerd.</p>
-                          {% endif %}
-                        </ul>
-                    </div>
+                        {% endif %}
+                    </select>
                 </div>
-
-                <button class="btn btn-success w-100 mt-3">Submit</button>
-            </form>
+            </div>
+        
+            <!-- Administrators List with Icons -->
+            <div class="card myBlock mt-3">
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% if administrator %}
+                            {% for item in administrator %}
+                                <li>
+                                    <input type="checkbox" class="form-check-input" id="{{ item.id }}" name="selected_admins[]" value="{{ item.id }},{{ item.company_number | upper }}-{{ item.name | upper }}">
+                                    <label class="form-check-label" for="{{ item.id }}">
+                                        <i class="fas fa-user me-2"></i>{{ item.company_number | upper }} - {{ item.name | upper }}
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <p><i class="fas fa-exclamation-circle me-2"></i>There are no Administrators registered.</p>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- Submit Button with Icon -->
+            <button class="btn btn-success w-100 mt-3">
+                <i class="fas fa-check-circle me-2"></i>Submit
+            </button>
+        </form>
         </div>
     </div>
     <script>
@@ -68,5 +75,11 @@
             setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
           }
         }, 4000); // 4000ms = 4 seconds
+        
+          var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+          var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+          });
+        
       </script>
 {% endblock %}

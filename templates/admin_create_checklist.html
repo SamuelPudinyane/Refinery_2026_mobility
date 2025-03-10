@@ -3,10 +3,18 @@
 {% block title %}ADMINISTRATORS{% endblock %}
 {% block sidebar %}
 <div class="container-fluid add-admin text-center py-3">
-  <a href="{{url_for('admin_create_checklist')}}" class="btn btn-secondary btn-sm my-1">CREATE CHECKLIST FOR OPERATOR</a>
-  <a href="{{url_for('admin_create_question')}}" class="btn btn-success btn-sm my-1">CREATE QUESTIONS</a>
-  <a href="{{url_for('admin_delete_question')}}" class="btn btn-success btn-sm my-1">DELETE QUESTIONS</a>
-  <a href="{{url_for('admin_edit_question')}}" class="btn btn-success btn-sm my-1">EDIT QUESTIONS</a>
+  <a href="{{ url_for('admin_create_checklist') }}" class="btn btn-secondary btn-sm my-1">
+      <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST FOR OPERATOR
+  </a>
+  <a href="{{ url_for('admin_create_question') }}" class="btn btn-success btn-sm my-1">
+      <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
+  </a>
+  <a href="{{ url_for('admin_delete_question') }}" class="btn btn-success btn-sm my-1">
+      <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
+  </a>
+  <a href="{{ url_for('admin_edit_question') }}" class="btn btn-success btn-sm my-1">
+      <i class="fas fa-edit me-2"></i>EDIT QUESTIONS
+  </a>
 </div>
 {% endblock %}
 
@@ -14,65 +22,84 @@
     <h2 class="text-center">CREATE CHECKLIST</h2>
     <div class="p-4">
       <form class="form-control" method="POST" action="/admin_create_checklist">
-        <label class="form-label"></label>
-        <select class="form-select" name="section" id="section">
-          <option value="">-- filter --</option>
-          {% for item in plant_sections %}
-            <option value="{{item}}">{{item |upper}}</option>
-            {% endfor %}
-          
-          <!-- Add more sections as needed -->
-        </select>
-        <br>
+        <!-- Filter Section with Icon -->
+        <div class="mb-3">
+            <label class="form-label">Filter Section</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-filter"></i>
+                </span>
+                <select class="form-select" name="section" id="section">
+                    <option value="">-- Filter --</option>
+                    {% for item in plant_sections %}
+                        <option value="{{ item }}">{{ item | upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    
+        <!-- Select Operator with Icon -->
+        <div class="mb-3">
+            <label class="form-label">Select Operator</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-user"></i>
+                </span>
+                <select class="form-select" name="select">
+                    <option value="">-- Select Operator --</option>
+                    {% if operators %}
+                        {% for operator in operators %}
+                            <option value="{{ operator.id }}" data-company-number="{{ operator.company_number }}">
+                                {{ operator.company_number | upper }} - {{ operator.name | upper }}
+                            </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="" disabled>No operators available</option>
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+    
+        <!-- Questions List with Icons -->
         <div class="card myBlock">
             <div class="container card card_add_admin">
-                <label class="form-label">Select operator before creating checklist</label>
-                <select class="form-select" name="select">
-                  <option value="">-- Select operator --</option>
-                  {% if operators %}
-                      {% for operator in operators %}
-                          <option value="{{ operator.id }}" data-company-number="{{ operator.company_number }}">
-                              {{ operator.company_number | upper }} - {{ operator.name | upper }}
-                          </option>
-                      {% endfor %}
-                  {% else %}
-                      <option value="" disabled>No operators available</option>
-                  {% endif %}
-                </select>
-                <br><br>
-                <div class="container card card_add_admin">
-                  <fieldset>
+                <fieldset>
                     <ul id="questions-list">
-                      {% if questions %}
-                        {% for question in questions %}
-                          <li>
-                              <label>
-                                  <input type="checkbox" name="question_id[]" value="{{question.id}}" /> # {{question.id}} - {{question.plant_section}} -  {{question.question}}
-                              </label>
-                          </li>
-                        {% endfor %}
-                      {% else %}
-                        <p class="empty">There are no questions available</p>
-                      {% endif %}
+                        {% if questions %}
+                            {% for question in questions %}
+                                <li>
+                                    <label>
+                                        <input type="checkbox" name="question_id[]" value="{{ question.id }}" />
+                                        <i class="fas fa-question-circle me-2"></i># {{ question.id }} - {{ question.plant_section }} - {{ question.question }}
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <p class="empty"><i class="fas fa-exclamation-circle me-2"></i>There are no questions available</p>
+                        {% endif %}
                     </ul>
-                  </fieldset>
-                </div>
-
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                      <div id="flash-message-container">
-                          {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}" role="alert">
-                              {{ message }}
-                            </div>
-                          {% endfor %}
-                      </div>
-                  {% endif %}
-                {% endwith %}
+                </fieldset>
             </div>
-            <button type="submit" class="btn btn-success btn-add-admin">Send checklist</button>
+    
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-message-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
         </div>
-      </form>
+    
+        <!-- Send Checklist Button with Icon -->
+        <button type="submit" class="btn btn-success btn-add-admin">
+            <i class="fas fa-paper-plane me-2"></i>Send Checklist
+        </button>
+    </form>
     </div>
     <script>
       // Flash message fade-out
@@ -124,5 +151,9 @@
         })
         .catch(error => console.error("Error:", error));
       });
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
     </script>
 {% endblock %}

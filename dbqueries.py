@@ -749,7 +749,7 @@ def insert_question(checklist_questions, location, plant_section, company_number
 
 
 
-def get_all_questions(company_number):
+def get_all_questions_by_company_number(company_number):
     """Retrieves all records from the questions table."""
     conn = None
     results = []

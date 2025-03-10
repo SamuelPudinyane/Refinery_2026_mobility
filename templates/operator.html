@@ -6,23 +6,38 @@
     <h2 class="text-center">OPERATOR</h2>
     <div class="p-4">
         <!-- Status message -->
-        <div id="status">Checking your location...</div>
+        <div id="status">
+            <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
+        </div>
 
         <!-- Questions (initially hidden) -->
         <div id="questions" style="display: none;">
             <form class="form-control" method="POST">
-                <label class="form-label">{{ operators_questions[0].plant_section | upper }}</label>
-
+                <!-- Plant Section Label with Icon -->
+                <label class="form-label">
+                    <i class="fas fa-industry me-2"></i>{{ operators_questions[0].plant_section | upper }}
+                </label>
+        
                 <div class="card myBlock">
                     <div class="container card card_add_admin">
-                        <h1>CHECKLIST</h1>
-
+                        <!-- Checklist Heading with Icon -->
+                        <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
+        
                         {% for q in operators_questions %}
                             <div class="mb-3">
-                                <label class="form-label">{{ q.question }}</label>
+                                <!-- Question Label with Icon -->
+                                <label class="form-label">
+                                    {{ loop.index }}. {{ q.question }}
+                                </label>
                                 
                                 {% if q.question_type == "text" %}
-                                    <input type="text" class="form-control" name="question_{{ q.id }}" required>
+                                    <!-- Text Input with Icon -->
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </span>
+                                        <input type="text" class="form-control" name="question_{{ q.id }}" required>
+                                    </div>
                                 
                                 {% elif q.question_type == "radio" %}
                                     {% for option in q.options[0] %}
@@ -35,23 +50,34 @@
                                                    onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
                                                    required>
                                             <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
-                                                {{ option }}
+                                               {{ option }}
                                             </label>
                                         </div>
                                     {% endfor %}
-
+        
                                     {% if q.reasoning %}
+                                        <!-- Reasoning Input with Icon -->
                                         <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
-                                            <label class="form-label">Provide a reason:</label>
-                                            <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                            <label class="form-label">
+                                                <i class="fas fa-comment-dots me-2"></i>Provide a reason:
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </span>
+                                                <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                            </div>
                                         </div>
                                     {% endif %}
                                 {% endif %}
                             </div>
                         {% endfor %}
                     </div>
-
-                    <button type="submit" class="btn btn-success btn-add-admin">Submit</button>
+        
+                    <!-- Submit Button with Icon -->
+                    <button type="submit" class="btn btn-success btn-add-admin">
+                        <i class="fas fa-check-circle me-2"></i>Submit
+                    </button>
                 </div>
             </form>
         </div>

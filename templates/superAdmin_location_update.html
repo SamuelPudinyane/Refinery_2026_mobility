@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="mt-4">Plant Section Locations</h2>
+    <h2 class="mt-4">Plant Section And Location</h2>
 
     <!-- Form to Add Location -->
     <form action="/submit_location" method="POST" class="mt-3">
@@ -16,12 +16,18 @@
 
         <div class="mb-3">
             <label for="latitude" class="form-label">Latitude:</label>
-            <input type="text" id="latitude" name="latitude" class="form-control" required>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <input type="text" id="latitude" name="latitude" class="form-control" required>
+            </div>
         </div>
-
+        
         <div class="mb-3">
             <label for="longitude" class="form-label">Longitude:</label>
-            <input type="text" id="longitude" name="longitude" class="form-control" required>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <input type="text" id="longitude" name="longitude" class="form-control" required>
+            </div>
         </div>
 
 

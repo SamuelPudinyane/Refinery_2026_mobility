@@ -8,9 +8,17 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        )
 from datetime import datetime
 import json
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+import os
 
-
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = get_db_connection()#os.getenv("DATABASE_URL")
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 app.secret_key="session"
 
@@ -358,3 +366,4 @@ def register():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    manager.run()

@@ -41,7 +41,7 @@ def get_db_connection():
         conn = psycopg2.connect(
             dbname="mobility_app", 
             user="mobility_app_user",  
-            password=os.getenv("DATABASE_URL","6gYNmrAofVijLNkB9RZOJbAhNE64vw4U"),  
+            password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
             host="dpg-cv79pjjtq21c73anf3ug-a", 
             port=5432 
         )

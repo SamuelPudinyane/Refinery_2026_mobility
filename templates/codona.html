@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wi-Fi Scanner</title>
+</head>
+<body>
+    <h1>Wi-Fi Scanner</h1>
+    <button id="scan">Scan Wi-Fi Networks</button>
+    <pre id="results"></pre>
+
+    <!--<script src="cordova.js"></script>  Include Cordova -->
+    
+    <script>
+        document.addEventListener('deviceready', function () {
+            // Add event listener to the scan button
+            document.getElementById('scan').addEventListener('click', function () {
+                // Scan for Wi-Fi networks
+                WifiWizard2.getScanResults().then(results => {
+                    // Display the results
+                    document.getElementById('results').textContent = JSON.stringify(results, null, 2);
+                }).catch(error => {
+                    console.error(error); // Handle errors
+                });
+            });
+        }, false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "rand_refinary",
+            "database": "rand_refinary",
+            "username": "postgres",
+            "password": "Admin"
+        }
+    ]
+}

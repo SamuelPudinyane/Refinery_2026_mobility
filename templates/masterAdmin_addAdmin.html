@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}ADD ADMINISTRATORS{% endblock %}
+
+{% block sidebar %}
+    <div class=" container-fluid add-admin text-center py-3">
+        <a href="{{ url_for('master_add') }}" class="btn btn-secondary btn-sm my-1">ADD ADMINISTRATORS</a>
+        <a href="{{ url_for('master_remove') }}" class="btn btn-success btn-sm my-1">REMOVE ADMINISTRATORS</a>
+        <a href="{{ url_for('master_view') }}" class="btn btn-success  btn-sm my-1">VIEW ADMINISTRATORS</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="text-center my-3">ADD ADMINISTRATOR</h2>
+        <div class="p-3">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        
+                        <div id="flash-message-container">
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                              </div>
+                            {% endfor %}
+                          </div>
+                       
+                    {% endif %}
+                {% endwith %}
+            <form class="form-control" action="/master_add" method="POST">
+                <label class="form-label">Select Section</label>
+                <select class="form-select" name="section" id="section">
+                  <option value="">-- Select Section --</option>
+                  {% if plant_section %}
+                  {% for item in plant_section%}
+                  <option value="{{item.plant_section | upper}}">{{item.plant_section | upper}}</option>
+                  {% endfor%}
+                  {% endif %}
+                  
+              </select>
+                
+                <div class="card myBlock mt-3">
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                          {% if administrator %}
+                          {% for item in administrator %}
+                          <li>
+                            <input type="checkbox" class="form-check-input" id="{{ item.id }}" name="selected_admins[]" value="{{item.id}},{{ item.company_number |upper }}-{{ item.name |upper }}">
+                            <label class="form-check-label" for="{{ item.id }}">{{ item.company_number |upper }} - {{ item.name |upper }}</label>
+                        </li>                        
+                          {% endfor %}
+                          {% else %}
+                          <p>There are no Administrators registerd.</p>
+                          {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <button class="btn btn-success w-100 mt-3">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+      setTimeout(function() {
+        let flashMessage = document.getElementById("flash-message-container");
+        if (flashMessage) {
+          flashMessage.style.transition = "opacity 0.5s ease-out";
+          flashMessage.style.opacity = "0";
+          setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
+        }
+      }, 4000); // 4000ms = 4 seconds
+    </script>
+{% endblock %}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CWTT | GPS LOCATION</title>
+    <link rel="stylesheet" href="/static/css/user/userstyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <script>
+        // Function to get the user's current location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to display the user's current position and accuracy
+        function showPosition(position) {
+            // Display latitude and longitude
+            document.getElementById("latitude").value = position.coords.latitude;
+            document.getElementById("longitude").value = position.coords.longitude;
+
+            // Display accuracy in meters
+            document.getElementById("accuracy").value = position.coords.accuracy.toFixed(2) + " meters";
+        }
+
+        // Function to handle errors
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        // Function to start continuous location updates
+        function startLocationUpdates() {
+            // Call getLocation immediately
+            getLocation();
+
+            // Set up an interval to call getLocation every second (1000 milliseconds)
+            setInterval(getLocation, 1000);
+        }
+    </script>
+</head>
+
+<!-- Call startLocationUpdates() when the page loads -->
+<body onload="startLocationUpdates()">
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <a href=""><img src="/static/images/LOGO/2.png"
+                        width="130px" /></a>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="cardSurvey">
+                <div class="card">
+                    <i class="fas fa-file-alt fa-3x" style="color: rgb(3, 3, 76);"></i>
+                </div>
+                <div class="card">
+                    <i class="fas fa-paper-plane fa-3x" style="color: rgb(3, 3, 76);"></i>
+                </div>
+            </div>
+            <div class="survey-container">
+                <h1>Your current GPS Location</h1><br><br>
+
+                <div class="card">
+                    <form method="post" action="">
+                        <div class="input_div">
+                            <label for="latitude">Latitude:</label>
+                            <input class="input" type="text" style="color: black;" id="latitude" name="latitude"
+                                readonly required>
+                        </div>
+                        <br><br>
+                        <div class="input_div">
+                            <label for="longitude">Longitude:</label>
+                            <input class="input" type="text" id="longitude" name="longitude" readonly required>
+                        </div>
+                        <br><br>
+                        <div class="input_div">
+                            <label for="accuracy">Accuracy:</label>
+                            <input class="input" type="text" id="accuracy" name="accuracy" readonly required>
+                        </div>
+                        <br>
+                        <button type="submit" class="submit-btn">SUBMIT</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</body>
+
+</html>

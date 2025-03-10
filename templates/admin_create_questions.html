@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}ADMINISTRATORS{% endblock %}
+{% block sidebar %}
+    <div class="container-fluid add-admin">
+        <a href="{{url_for('admin_create_checklist')}}" class="btn btn-success btn-sm my-1">CREATE CHECKLIST FOR OPERATOR</a>
+        <a href="{{url_for('admin_create_question')}}" class="btn btn-secondary btn-sm my-1">CREATE QUESTIONS</a>
+        <a href="{{url_for('admin_delete_question')}}" class="btn btn-success btn-sm my-1">DELETE QUESTIONS</a>
+        <a href="{{url_for('admin_edit_question')}}" class="btn btn-success btn-sm my-1">EDIT QUESTIONS</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h2 class="text-center">CREATE QUESTION</h2>
+    <div class="p-4">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        
+                        <div id="flash-message-container">
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                              </div>
+                            {% endfor %}
+                          </div>
+                       
+                    {% endif %}
+                {% endwith %}
+      <form id="createQuestionForm" class="form-control" action="/admin_create_question" method="POST">
+        <label class="form-label"></label>
+        <select class="form-select" name="section" id="section">
+            <option value="">-- Select Section --</option>
+            {% for item in plant_sections %}
+            <option value="{{item}}">{{item |upper}}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <div class="card myBlock">
+            <div class="container card card_add_admin">
+                <label for="question" class="form-label">Write your question below</label>
+                <input id="question" class="form-control" type="text" name="question" required />
+    
+                <label for="dropdown" class="form-label">Choose question type</label>
+                <select id="dropdown" name="question_type" class="form-select" required>
+                    <option value="">-- Select Question Type --</option>
+                    <option value="text">Text</option>
+                    <option value="radio">Radio Buttons</option>
+                </select>
+    
+                <!-- Options input (hidden by default) -->
+                <div id="optionsSection" style="display: none;">
+                    <label for="options">If question type is Radio button, provide two answers separated by a comma (e.g., YES, NO)</label>
+                    <br>
+                    <input id="options" class="form-control" type="text" name="options[]" placeholder="YES,NO" />
+                </div>
+    
+                <!-- Reasoning section (hidden by default) -->
+                <div id="reasoningSection" style="display: none;">
+                    <label>If the user's answer is YES or NO, and you want to control based on the answer, activate the text box for reasoning/commenting. If you don't need reasoning, leave the buttons below blank.</label>
+                    <hr>
+                    <fieldset>
+                        <label>
+                            <input type="radio" name="reasoning" value="yes" /> If the user's answer is YES and you need reasoning, activate this button
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="reasoning" value="no" /> If the user's answer is NO and you need reasoning, activate this button
+                        </label>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success btn-add-admin">Add Question</button>
+    </form>
+    </div>
+
+    <!-- Include jQuery (optional, for easier AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Show/hide options and reasoning sections based on question type
+            $('#dropdown').change(function () {
+                if ($(this).val() === 'radio') {
+                    $('#optionsSection').show(); // Show options input
+                    $('#reasoningSection').show(); // Show reasoning section
+                } else {
+                    $('#optionsSection').hide(); // Hide options input
+                    $('#reasoningSection').hide(); // Hide reasoning section
+                }
+            });
+
+            
+        });
+     
+          setTimeout(function() {
+            let flashMessage = document.getElementById("flash-message-container");
+            if (flashMessage) {
+              flashMessage.style.transition = "opacity 0.5s ease-out";
+              flashMessage.style.opacity = "0";
+              setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
+            }
+          }, 4000); // 4000ms = 4 seconds
+        
+    </script>
+{% endblock %}

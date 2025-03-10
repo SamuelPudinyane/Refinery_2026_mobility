@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Checklist Form{% endblock %}
+
+{% block content %}
+    <h2 class="text-center">OPERATOR</h2>
+    <div class="p-4">
+        <form class="form-control" method="POST">
+            <label class="form-label">{{ operators_questions[0].plant_section | upper }}</label>
+
+            <div class="card myBlock">
+                <div class="container card card_add_admin">
+                    <h1>CHECKLIST</h1>
+
+                    {% for q in operators_questions %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ q.question }}</label>
+                            
+                            {% if q.question_type == "text" %}
+                                <input type="text" class="form-control" name="question_{{ q.id }}" required>
+                            
+                            {% elif q.question_type == "radio" %}
+                                {% for option in q.options[0] %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ q.id }}" 
+                                               value="{{ option }}" 
+                                               id="radio_{{ q.id }}_{{ option }}"
+                                               data-reasoning="{{ q.reasoning }}"
+                                               onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
+                                               required>
+                                        <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
+                                            {{ option }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+
+                                {% if q.reasoning %}
+                                    <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
+                                        <label class="form-label">Provide a reason:</label>
+                                        <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-success btn-add-admin">Submit</button>
+            </div>
+        </form>
+    </div>
+
+<script>
+    function toggleReasonInput(questionId, selectedOption) {
+        const reasonDiv = document.getElementById(`reason_${questionId}`);
+        
+        // Find the selected radio button
+        const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
+        
+        if (!selectedRadio) return; // No selection, do nothing
+        
+        const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
+
+        // Check if we need to show the reason input
+        if ((reasoning === "yes" && selectedOption === "YES") || 
+            (reasoning === "no" && selectedOption === "NO")) {
+            reasonDiv.style.display = "block";
+        } else {
+            reasonDiv.style.display = "none";
+        }
+    }
+</script>
+
+{% endblock %}

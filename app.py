@@ -16,12 +16,12 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")#get_db_connection()#
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL","postgresql://mobility_app_user:6gYNmrAofVijLNkB9RZOJbAhNE64vw4U@dpg-cv79pjjtq21c73anf3ug-a.frankfurt-postgres.render.com/mobility_app")#get_db_connection()#
+# db = SQLAlchemy(app)
+# migrate = Migrate(app, db)
 
 app.secret_key="session"
-
+print(os.getenv("DATABASE_URL"))
 @app.route("/")
 @app.route('/login',methods=['GET','POST'])
 def login():
@@ -315,21 +315,52 @@ def admin_create_checklist():
     return render_template('admin_create_checklist.html', operators=operators, questions=questions,plant_sections=plant_sections)
 
 
-
-@app.route('/operator')
+@app.route('/operator', methods=["GET", "POST"])
 def operator():
-    user=session['user']
-    
-    questions=get_all_questions(user['company_number'])
-    
-    
-    questions=json.loads(questions[0]['checklist_questions'])
-    print(questions)
-    # questions[0]['reasoning']="no"
-    # questions=questions
- 
-    return render_template('operator.html',operators_questions=questions)
+    user = session['user']
 
+    if request.method == 'POST':
+        # Get the user's location from the request
+        user_location = request.json
+        user_lat = user_location['latitude']
+        user_lon = user_location['longitude']
+
+        # Store the user's location in the session
+        session['user_lat'] = user_lat
+        session['user_lon'] = user_lon
+
+        # Get the target location and range
+        questions = get_all_questions(user['company_number'])
+        location = json.loads(questions[0]['location'])
+        target_location = location[0]
+        # target={"latitude":-26.248538,"longitude":27.854032,"range":2}
+
+        # Check if the user is within range
+        is_within = is_within_range(
+            str(user_lat), str(user_lon),
+            target_location['latitude'], target_location['longitude'],
+            target_location['range']
+        )
+
+        # Prepare the response
+        response_data = {
+            'status': 'success',
+            'is_within_range': is_within,
+        }
+
+        # Include operators_questions in the response if within range
+        if is_within:
+            questions = json.loads(questions[0]['checklist_questions'])
+            response_data['operators_questions'] = questions
+
+        # Return the result as JSON
+        return jsonify(response_data)
+
+    # For GET requests, render the template
+    questions = get_all_questions(user['company_number'])
+    questions = json.loads(questions[0]['checklist_questions'])
+
+    return render_template('operator.html', operators_questions=questions)
 
 @app.route("/submit_location", methods=["GET","POST"])
 def submit_location():
@@ -362,8 +393,33 @@ def register():
 
     return render_template('superAdmin.html')
 
+from geopy.distance import geodesic
 
+def is_within_range(user_lat, user_lon, target_lat, target_lon, range_meters):
+    """
+    Check if the user's location is within the specified range of the target location.
+
+    :param user_lat: User's latitude
+    :param user_lon: User's longitude
+    :param target_lat: Target latitude
+    :param target_lon: Target longitude
+    :param range_meters: Range in meters
+    :return: True if the user is within range, False otherwise
+    """
+    # Create tuples for the user and target locations
+    user_location = (user_lat, user_lon)
+    target_location = (target_lat, target_lon)
+
+    # Calculate the distance between the two points in meters
+    distance = geodesic(user_location, target_location).meters
+
+    # Check if the distance is within the specified range
+    return distance <= range_meters
+
+@app.route('/getlocation',methods=['POST','GET'])
+def getlocation():
+    return render_template("getlocation.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
-    manager.run()
+    # manager.run()

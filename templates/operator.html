@@ -5,71 +5,158 @@
 {% block content %}
     <h2 class="text-center">OPERATOR</h2>
     <div class="p-4">
-        <form class="form-control" method="POST">
-            <label class="form-label">{{ operators_questions[0].plant_section | upper }}</label>
+        <!-- Status message -->
+        <div id="status">Checking your location...</div>
 
-            <div class="card myBlock">
-                <div class="container card card_add_admin">
-                    <h1>CHECKLIST</h1>
+        <!-- Questions (initially hidden) -->
+        <div id="questions" style="display: none;">
+            <form class="form-control" method="POST">
+                <label class="form-label">{{ operators_questions[0].plant_section | upper }}</label>
 
-                    {% for q in operators_questions %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ q.question }}</label>
-                            
-                            {% if q.question_type == "text" %}
-                                <input type="text" class="form-control" name="question_{{ q.id }}" required>
-                            
-                            {% elif q.question_type == "radio" %}
-                                {% for option in q.options[0] %}
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ q.id }}" 
-                                               value="{{ option }}" 
-                                               id="radio_{{ q.id }}_{{ option }}"
-                                               data-reasoning="{{ q.reasoning }}"
-                                               onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
-                                               required>
-                                        <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
-                                            {{ option }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
+                <div class="card myBlock">
+                    <div class="container card card_add_admin">
+                        <h1>CHECKLIST</h1>
 
-                                {% if q.reasoning %}
-                                    <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
-                                        <label class="form-label">Provide a reason:</label>
-                                        <input type="text" class="form-control" name="reason_{{ q.id }}">
-                                    </div>
+                        {% for q in operators_questions %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ q.question }}</label>
+                                
+                                {% if q.question_type == "text" %}
+                                    <input type="text" class="form-control" name="question_{{ q.id }}" required>
+                                
+                                {% elif q.question_type == "radio" %}
+                                    {% for option in q.options[0] %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   name="question_{{ q.id }}" 
+                                                   value="{{ option }}" 
+                                                   id="radio_{{ q.id }}_{{ option }}"
+                                                   data-reasoning="{{ q.reasoning }}"
+                                                   onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
+                                                   required>
+                                            <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
+                                                {{ option }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+
+                                    {% if q.reasoning %}
+                                        <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
+                                            <label class="form-label">Provide a reason:</label>
+                                            <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
 
-                <button type="submit" class="btn btn-success btn-add-admin">Submit</button>
-            </div>
-        </form>
+                    <button type="submit" class="btn btn-success btn-add-admin">Submit</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-<script>
-    function toggleReasonInput(questionId, selectedOption) {
-        const reasonDiv = document.getElementById(`reason_${questionId}`);
-        
-        // Find the selected radio button
-        const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
-        
-        if (!selectedRadio) return; // No selection, do nothing
-        
-        const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
+    <script>
+        function toggleReasonInput(questionId, selectedOption) {
+            const reasonDiv = document.getElementById(`reason_${questionId}`);
+            
+            // Find the selected radio button
+            const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
+            
+            if (!selectedRadio) return; // No selection, do nothing
+            
+            const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
 
-        // Check if we need to show the reason input
-        if ((reasoning === "yes" && selectedOption === "YES") || 
-            (reasoning === "no" && selectedOption === "NO")) {
-            reasonDiv.style.display = "block";
-        } else {
-            reasonDiv.style.display = "none";
+            // Check if we need to show the reason input
+            if ((reasoning === "yes" && selectedOption === "YES") || 
+                (reasoning === "no" && selectedOption === "NO")) {
+                reasonDiv.style.display = "block";
+            } else {
+                reasonDiv.style.display = "none";
+            }
         }
-    }
-</script>
-
+        
+            let watchId;
+          
+            // Function to handle location updates
+            function displayLocation(position) {
+              const userLat = position.coords.latitude;
+              const userLon = position.coords.longitude;
+          
+              // Send the location to the server
+              fetch('/operator', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  latitude: userLat,
+                  longitude: userLon,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  // Handle the response (e.g., update the page)
+                  console.log(data);
+                  updatePage(data); // Update the page dynamically
+                })
+                .catch((error) => {
+                  console.error('Error:', error);
+                });
+            }
+          
+            // Function to handle errors
+            function handleError(error) {
+              console.error('Error getting location:', error);
+            }
+          
+            // Start watching the user's location
+            function startWatchingLocation() {
+              if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                  displayLocation,
+                  handleError,
+                  {
+                    enableHighAccuracy: true, // Use high accuracy mode
+                    timeout: 5000, // Maximum time to wait for a location (in milliseconds)
+                    maximumAge: 0, // Do not use a cached position
+                  }
+                );
+              } else {
+                console.error('Geolocation is not supported by this browser.');
+              }
+            }
+          
+            // Stop watching the user's location
+            function stopWatchingLocation() {
+              if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+              }
+            }
+          
+            // Function to update the page dynamically
+            function updatePage(data) {
+              const statusDiv = document.getElementById('status');
+              const questionsDiv = document.getElementById('questions');
+          
+              if (data.is_within_range) {
+                // Display the questions if within range
+                statusDiv.innerHTML = 'You are within range!';
+                questionsDiv.style.display = 'block'; // Show the questions
+              } else {
+                // Display a message if outside the range
+                statusDiv.innerHTML = 'You are outside the range.';
+                questionsDiv.style.display = 'none'; // Hide the questions
+              }
+            }
+          
+            // Start watching when the page loads
+            window.onload = startWatchingLocation;
+          
+            // Stop watching when the page is unloaded
+            window.onbeforeunload = stopWatchingLocation;
+          
+    </script>
 {% endblock %}

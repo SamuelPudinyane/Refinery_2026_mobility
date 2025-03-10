@@ -2,7 +2,7 @@ import psycopg2
 import bcrypt
 from encryption import (hash_password)
 import json
-
+import os
 
 
 """ 
@@ -19,21 +19,36 @@ import json
 
 """
 
+# def get_db_connection():
+#     try:
+#         # Use environment variables for connection parameters
+#         conn = psycopg2.connect(
+#             dbname="rand_refinary", 
+#             user="postgres",  
+#             password="Admin",  
+#             host="localhost", 
+#             port=5432 
+#         )
+#         return conn
+#     except Exception as e:
+#         print(f"Error connecting to PostgreSQL database: {e}")
+#         return None
+
+
 def get_db_connection():
     try:
         # Use environment variables for connection parameters
         conn = psycopg2.connect(
-            dbname="rand_refinary", 
-            user="postgres",  
-            password="Admin",  
-            host="localhost", 
+            dbname="mobility_app", 
+            user="mobility_app_user",  
+            password=os.getenv("DATABASE_URL","6gYNmrAofVijLNkB9RZOJbAhNE64vw4U"),  
+            host="dpg-cv79pjjtq21c73anf3ug-a", 
             port=5432 
         )
         return conn
     except Exception as e:
         print(f"Error connecting to PostgreSQL database: {e}")
         return None
-
 
 
 # Database connection function

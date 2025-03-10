@@ -40,7 +40,7 @@ def login():
         elif user['role']=='superadmin':
             return render_template("superAdmin.html")
 
-    return render_template('getlocation.html')
+    return render_template('index.html')
 
 
 @app.route('/master_add',methods=['GET','POST'])

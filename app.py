@@ -4,7 +4,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        get_all_operators,insert_into_checklist_questions,get_all_questions,delete_selected_questions,get_one_question,
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
-                        get_operator_with_id,insert_question,get_all_questions_by_company_number
+                        get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin
                        )
 from datetime import datetime
 import json
@@ -383,13 +383,21 @@ def submit_location():
         longitude= request.form["longitude"]
         range= request.form["range"]
         user_id=user['id']
-        location=insert_into_section_location(plant_section, latitude, longitude, range, user_id)
-        if "message" in location:
-            flash("plant section already exist")
-            return redirect(url_for("submit_location"))
-        else:
-            flash("successfully safed")
-            return redirect(url_for("submit_location"))
+        insert_into_section_location(plant_section, latitude, longitude, range, user_id)
+        
+        flash("successfully safed")
+        return redirect(url_for("submit_location"))
+    return render_template("superAdmin_location_update.html",locations=locations)
+
+@app.route('/delete_location/<plant_section>', methods=['GET', 'POST'])
+def delete_location(plant_section):
+    user=session['user']
+    locations=get_all_locations()
+    print(locations)
+    plant_section= plant_section
+    print("plant section ",plant_section)
+    delete_from_super_admin(plant_section)
+        
     return render_template("superAdmin_location_update.html",locations=locations)
 
 @app.route('/register', methods=['GET', 'POST'])

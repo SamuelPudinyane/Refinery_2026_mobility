@@ -788,6 +788,32 @@ def get_all_questions_by_company_number(company_number):
             conn.close()  # Ensure the connection is closed
 
 
+def delete_from_super_admin(plant_section):
+    """Deletes an administrator from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Delete Query
+        query = "DELETE FROM administrator WHERE plant_section=%s"
+        cur.execute(query, (plant_section))  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
 
 
 

@@ -19,36 +19,36 @@ import os
 
 """
 
-# def get_db_connection():
-#     try:
-#         # Use environment variables for connection parameters
-#         conn = psycopg2.connect(
-#             dbname="rand_refinary", 
-#             user="postgres",  
-#             password="Admin",  
-#             host="localhost", 
-#             port=5432 
-#         )
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to PostgreSQL database: {e}")
-#         return None
-
-
 def get_db_connection():
     try:
         # Use environment variables for connection parameters
         conn = psycopg2.connect(
-            dbname="mobility_app", 
-            user="mobility_app_user",  
-            password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
-            host="dpg-cv79pjjtq21c73anf3ug-a", 
+            dbname="rand_refinary", 
+            user="postgres",  
+            password="Admin",  
+            host="localhost", 
             port=5432 
         )
         return conn
     except Exception as e:
         print(f"Error connecting to PostgreSQL database: {e}")
         return None
+
+
+# def get_db_connection():
+#     try:
+#         # Use environment variables for connection parameters
+#         conn = psycopg2.connect(
+#             dbname="mobility_app", 
+#             user="mobility_app_user",  
+#             password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
+#             host="dpg-cv79pjjtq21c73anf3ug-a", 
+#             port=5432 
+#         )
+#         return conn
+#     except Exception as e:
+#         print(f"Error connecting to PostgreSQL database: {e}")
+#         return None
 
 
 # Database connection function
@@ -683,7 +683,7 @@ def get_all_locations_by_plant_section(plant_section):
                 cursor.execute(query,(plant_section,) )  # Fixed parameter passing
 
                 # Fetch all rows
-                rows = cursor.fetchall()
+                rows = cursor.fetchone()
 
                 # Convert query result into a list of dictionaries
                 data = [
@@ -816,4 +816,69 @@ def delete_from_super_admin(plant_section):
         return False  # Return False in case of an error
 
 
+def delete_from_checklist_questions(plant_section):
+    """Deletes an administrator from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
 
+        # Delete Query
+        query = "DELETE FROM plant_section_locations WHERE plant_section=%s"
+        cur.execute(query, (plant_section,))  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
+
+
+def delete_administrators_by_plant_section(plant_section):
+    """
+    Deletes all rows from the administrator table where plant_section matches the given value.
+    
+    :param plant_section: The plant_section value to match for deletion.
+    """
+    try:
+        # Connect to the database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # SQL query to delete rows
+        query = """
+            DELETE FROM administrator
+            WHERE plant_section = %s;
+        """
+        
+        # Execute the query
+        cursor.execute(query, (plant_section,))
+        
+        # Commit the transaction
+        conn.commit()
+        
+        print(f"Deleted {cursor.rowcount} rows where plant_section = '{plant_section}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+delete_from_checklist_questions("JUST_LAB")
+delete_from_checklist_questions("JUST_LAB")
+delete_from_checklist_questions("GRANULATION_PLANT")
+delete_from_checklist_questions("GRANULATION_PLANT")

@@ -287,7 +287,7 @@ def admin_create_checklist():
             section = request.form.get("section")
             print("section ",section.lower())
             select = request.form.get("select")
-            location=get_all_locations_by_plant_section(section.lower())
+            location=get_all_locations_by_plant_section(section)
             print("location ",location)
             Checked_questions=request.form.getlist("question_id[]")
             operators_questions=[]
@@ -384,7 +384,7 @@ def submit_location():
         longitude= request.form["longitude"]
         range= request.form["range"]
         user_id=user['id']
-        insert_into_section_location(plant_section, latitude, longitude, range, user_id)
+        insert_into_section_location(plant_section.upper(), latitude, longitude, range, user_id)
         
         flash("successfully safed")
         return redirect(url_for("submit_location"))

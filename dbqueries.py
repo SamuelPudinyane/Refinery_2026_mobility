@@ -670,33 +670,39 @@ def get_all_plant_sections():
 
 
 def get_all_locations_by_plant_section(plant_section):
-    """Fetch all plant_section_locations."""
+    """Fetch all plant_section_locations for a given plant_section."""
     try:
         # Ensure proper resource management
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 query = """
-                SELECT id,plant_section, latitude, longitude, range, user_id
-                    FROM plant_section_locations WHERE plant_section= %s
-                
+                SELECT id, plant_section, latitude, longitude, range, user_id
+                FROM plant_section_locations
+                WHERE plant_section = %s
                 """
-                cursor.execute(query,(plant_section,) )  # Fixed parameter passing
+                cursor.execute(query, (plant_section,))  # Fixed parameter passing
 
                 # Fetch all rows
-                rows = cursor.fetchone()
+                rows = cursor.fetchall()  # Use fetchall() instead of fetchone()
 
                 # Convert query result into a list of dictionaries
                 data = [
-                    {"id": row[0], "plant_section": row[1], "latitude": row[2], "longitude": row[3],"range":row[4],"user_id":row[5]} 
+                    {
+                        "id": row[0],
+                        "plant_section": row[1],
+                        "latitude": row[2],
+                        "longitude": row[3],
+                        "range": row[4],
+                        "user_id": row[5],
+                    }
                     for row in rows
                 ]
 
                 return data  # Return the list
 
     except Exception as e:
-        print("Error fetching administrators:", e)
+        print("Error fetching locations:", e)
         return []  # Return empty list if an error occurs
-
 
 def insert_question(checklist_questions, location, plant_section, company_number, operator, time_stamp,checklist_answers=None, operators_location=None ):
     """Inserts a new question entry into the PostgreSQL database"""
@@ -815,50 +821,44 @@ def delete_from_super_admin(plant_section):
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
 
-from psycopg2 import sql
 
-def delete_all_data_from_all_tables():
-    """
-    Deletes all data from all tables in the database.
-    """
+
+
+def get_all():
+    """Retrieves all records from the questions table."""
+    conn = None
+    results = []
+
     try:
-        # Connect to the database
+        # Connect to PostgreSQL
         conn = get_db_connection()
-        cursor = conn.cursor()
+        if conn is None:
+            return None  # Return None if connection fails
 
-        # Disable foreign key checks (if needed)
-        cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
+        cur = conn.cursor()
 
-        # Get a list of all tables in the database
-        cursor.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public';
-        """)
-        tables = cursor.fetchall()
+        # Select query to fetch all records
+        select_query = """
+        SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+               company_number, operator, operators_location, time_stamp
+        FROM public.questions ;
+        """
+        
+        cur.execute(select_query,)
+        rows = cur.fetchall()
 
-        # Iterate through each table and delete all data
-        for table in tables:
-            table_name = table[0]
-            print(f"Deleting all data from table: {table_name}")
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+        print("this are questions ",results)
+        return results  # Return all records as a list of dictionaries
 
-            # Use TRUNCATE for faster deletion (resets auto-increment counters)
-            cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
-                sql.Identifier(table_name)
-            ))
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
 
-        # Commit the transaction
-        conn.commit()
-        print("All data has been deleted from all tables.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
     finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
         if conn:
-            conn.close()
-
-# Example usage
-delete_all_data_from_all_tables()
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+get_all()

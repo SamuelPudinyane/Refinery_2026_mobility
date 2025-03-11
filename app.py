@@ -253,7 +253,8 @@ def admin_create_checklist():
     operators = get_all_operators()
     user=session['user']
     plant_sections=[]
-    found_admin=get_administrator_with_id(user['id'])
+    found_admin=get_administrator_with_id(user["id"])
+    print(found_admin)
     if not found_admin:
         flash("you are currently not assigned to any plant section")
         return redirect(url_for('login'))

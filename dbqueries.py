@@ -879,6 +879,6 @@ def delete_administrators_by_plant_section(plant_section):
 
 
 delete_from_checklist_questions("JUST_LAB")
-delete_from_checklist_questions("JUST_LAB")
-delete_from_checklist_questions("GRANULATION_PLANT")
+delete_administrators_by_plant_section("JUST_LAB")
+delete_administrators_by_plant_section("GRANULATION_PLANT")
 delete_from_checklist_questions("GRANULATION_PLANT")

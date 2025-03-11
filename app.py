@@ -284,8 +284,10 @@ def admin_create_checklist():
         # Handle form submission
         else:
             section = request.form.get("section")
+            print("section ",section.lower())
             select = request.form.get("select")
-            location=get_all_locations_by_plant_section(section)
+            location=get_all_locations_by_plant_section(section.lower())
+            print("location ",location)
             Checked_questions=request.form.getlist("question_id[]")
             operators_questions=[]
             if Checked_questions:
@@ -299,7 +301,7 @@ def admin_create_checklist():
                
                 latitute_longitude=[]
                 for item in location:
-                    print(item)
+                    
                     lat_lon={"latitude":item['latitude'],"longitude":item['longitude'],"range":item['range']}
                     
                     latitute_longitude.append(lat_lon)
@@ -334,9 +336,9 @@ def operator():
         print("questions ",questions)
         if questions:
             location = json.loads(questions[0]['location'])
-            print("LOCATION ",location)
+            print("LOCATION ",location[0])
             
-            target_location = location
+            target_location = location[0]
             #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
             # Check if the user is within range

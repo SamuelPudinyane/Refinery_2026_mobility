@@ -826,93 +826,93 @@ def delete_from_super_admin(plant_section):
 
 
 
-def get_all():
-    """Retrieves all records from the questions table."""
-    conn = None
-    results = []
+# def get_all():
+#     """Retrieves all records from the questions table."""
+#     conn = None
+#     results = []
 
-    try:
-        # Connect to PostgreSQL
-        conn = get_db_connection()
-        if conn is None:
-            return None  # Return None if connection fails
+#     try:
+#         # Connect to PostgreSQL
+#         conn = get_db_connection()
+#         if conn is None:
+#             return None  # Return None if connection fails
 
-        cur = conn.cursor()
+#         cur = conn.cursor()
 
-        # Select query to fetch all records
-        select_query = """
-        SELECT id, checklist_questions, checklist_answers, location, plant_section, 
-               company_number, operator, operators_location, time_stamp
-        FROM public.questions ;
-        """
+#         # Select query to fetch all records
+#         select_query = """
+#         SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+#                company_number, operator, operators_location, time_stamp
+#         FROM public.questions ;
+#         """
         
-        cur.execute(select_query,)
-        rows = cur.fetchall()
+#         cur.execute(select_query,)
+#         rows = cur.fetchall()
 
-        # Convert the results to a list of dictionaries
-        columns = [desc[0] for desc in cur.description]  # Get column names
-        results = [dict(zip(columns, row)) for row in rows]
-        print("this are questions ",results)
-        return results  # Return all records as a list of dictionaries
+#         # Convert the results to a list of dictionaries
+#         columns = [desc[0] for desc in cur.description]  # Get column names
+#         results = [dict(zip(columns, row)) for row in rows]
+#         print("this are questions ",results)
+#         return results  # Return all records as a list of dictionaries
 
-    except psycopg2.Error as e:
-        print("Error fetching questions:", e)
-        return None  # Indicate failure
+#     except psycopg2.Error as e:
+#         print("Error fetching questions:", e)
+#         return None  # Indicate failure
 
-    finally:
-        if conn:
-            cur.close()
-            conn.close()  # Ensure the connection is closed
-get_all()
-
-
+#     finally:
+#         if conn:
+#             cur.close()
+#             conn.close()  # Ensure the connection is closed
+# get_all()
 
 
 
 
-def delete_all_data_from_all_tables():
-    """
-    Deletes all data from all tables in the database.
-    """
-      # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
+
+
+# def delete_all_data_from_all_tables():
+#     """
+#     Deletes all data from all tables in the database.
+#     """
+#       # Connect to the database
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     try:
       
 
-        # Disable foreign key checks (if needed)
-        cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
+#         # Disable foreign key checks (if needed)
+#         cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
 
-        # Get a list of all tables in the database
-        cursor.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public';
-        """)
-        tables = cursor.fetchall()
+#         # Get a list of all tables in the database
+#         cursor.execute("""
+#             SELECT table_name
+#             FROM information_schema.tables
+#             WHERE table_schema = 'public';
+#         """)
+#         tables = cursor.fetchall()
 
-        # Iterate through each table and delete all data
-        for table in tables:
-            table_name = table[0]
-            print(f"Deleting all data from table: {table_name}")
+#         # Iterate through each table and delete all data
+#         for table in tables:
+#             table_name = table[0]
+#             print(f"Deleting all data from table: {table_name}")
 
-            # Use TRUNCATE for faster deletion (resets auto-increment counters)
-            cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
-                sql.Identifier(table_name)
-            ))
+#             # Use TRUNCATE for faster deletion (resets auto-increment counters)
+#             cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
+#                 sql.Identifier(table_name)
+#             ))
 
-        # Commit the transaction
-        conn.commit()
-        print("All data has been deleted from all tables.")
+#         # Commit the transaction
+#         conn.commit()
+#         print("All data has been deleted from all tables.")
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#     finally:
+#         # Close the cursor and connection
+#         if cursor:
+#             cursor.close()
+#         if conn:
+#             conn.close()
 
-# Example usage
-delete_all_data_from_all_tables()
+# # Example usage
+# delete_all_data_from_all_tables()

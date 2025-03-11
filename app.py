@@ -312,7 +312,7 @@ def admin_create_checklist():
                 
                 insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
             # Process the form data (e.g., save to database)
-            return render_template("tion.html",operators_questions=operators_questions)
+            return redirect(url_for("admin_create_checklist")) #render_template("tion.html",operators_questions=operators_questions)
 
     # Render the template for GET requests
     return render_template('admin_create_checklist.html', operators=operators, questions=questions,plant_sections=plant_sections)

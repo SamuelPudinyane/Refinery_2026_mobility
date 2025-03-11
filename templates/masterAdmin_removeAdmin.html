@@ -4,13 +4,13 @@
 
 {% block sidebar %}
 <div class="container-fluid add-admin text-center py-3">
-  <a href="{{ url_for('master_add') }}" class="btn btn-success btn-sm my-1">
+  <a href="{{ url_for('master_add') }}" class="btn btn-dark btn-sm my-1">
       <i class="fas fa-user-plus me-2"></i>ADD ADMINISTRATORS
   </a>
   <a href="{{ url_for('master_remove') }}" class="btn btn-secondary btn-sm my-1" data-bs-toggle="tooltip" title="Remove administrators">
     <i class="fas fa-user-minus me-2"></i>REMOVE ADMINISTRATORS
 </a>
-  <a href="{{ url_for('master_view') }}" class="btn btn-success btn-sm my-1">
+  <a href="{{ url_for('master_view') }}" class="btn btn-dark btn-sm my-1">
       <i class="fas fa-users me-2"></i>VIEW ADMINISTRATORS
   </a>
 </div>

@@ -331,37 +331,42 @@ def operator():
 
         # Get the target location and range
         questions = get_all_questions_by_company_number(user['company_number'])
-        location = json.loads(questions[0]['location'])
-        print(location)
-        
-        target_location = location
-        #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
+        print("questions ",questions)
+        if questions:
+            location = json.loads(questions[0]['location'])
+            print("LOCATION ",location)
+            
+            target_location = location
+            #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
-        # Check if the user is within range
-        is_within = is_within_range(
-            str(user_lat), str(user_lon),
-            target_location['latitude'], target_location['longitude'],
-            target_location['range']
-        )
+            # Check if the user is within range
+            is_within = is_within_range(
+                str(user_lat), str(user_lon),
+                target_location['latitude'], target_location['longitude'],
+                target_location['range']
+            )
 
-        # Prepare the response
-        response_data = {
-            'status': 'success',
-            'is_within_range': is_within,
-        }
+            # Prepare the response
+            response_data = {
+                'status': 'success',
+                'is_within_range': is_within,
+            }
 
-        # Include operators_questions in the response if within range
-        if is_within:
-            questions = json.loads(questions[0]['checklist_questions'])
-            response_data['operators_questions'] = questions
+            # Include operators_questions in the response if within range
+            if is_within:
+                questions = json.loads(questions[0]['checklist_questions'])
+                response_data['operators_questions'] = questions
 
-        # Return the result as JSON
-        return jsonify(response_data)
+            # Return the result as JSON
+            return jsonify(response_data)
 
     # For GET requests, render the template
     questions = get_all_questions_by_company_number(user['company_number'])
-    questions = json.loads(questions[0]['checklist_questions'])
+    print("questions ",questions)
+    if questions:
+        questions = json.loads(questions[0]['checklist_questions'])
 
+        return render_template('operator.html', operators_questions=questions)
     return render_template('operator.html', operators_questions=questions)
 
 @app.route("/submit_location", methods=["GET","POST"])

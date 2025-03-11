@@ -14,15 +14,17 @@
         <div id="questions" style="display: none;">
             <form class="form-control" method="POST">
                 <!-- Plant Section Label with Icon -->
-                <label class="form-label">
-                    <i class="fas fa-industry me-2"></i>{{ operators_questions[0].plant_section | upper }}
-                </label>
+                {% if operators_questions | length > 0 %}
+                    <label class="form-label">
+                        <i class="fas fa-industry me-2"></i>{{ operators_questions[0].plant_section | upper }}
+                    </label>
+                {% endif %}
         
                 <div class="card myBlock">
                     <div class="container card card_add_admin">
                         <!-- Checklist Heading with Icon -->
                         <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
-        
+        {% if operators_questions | length>0 %}
                         {% for q in operators_questions %}
                             <div class="mb-3">
                                 <!-- Question Label with Icon -->
@@ -72,6 +74,9 @@
                                 {% endif %}
                             </div>
                         {% endfor %}
+                        {% else %}
+                        <p>No questions available.</p>
+                        {% endif %}
                     </div>
         
                     <!-- Submit Button with Icon -->

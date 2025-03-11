@@ -332,14 +332,16 @@ def operator():
         # Get the target location and range
         questions = get_all_questions_by_company_number(user['company_number'])
         location = json.loads(questions[0]['location'])
-        target_location = location[0]
-        target={"latitude":-26.248538,"longitude":27.854032,"range":2}
+        print(location)
+        if location:
+            target_location = location[0]
+        #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
         # Check if the user is within range
         is_within = is_within_range(
             str(user_lat), str(user_lon),
-            target['latitude'], target['longitude'],
-            target['range']
+            target_location['latitude'], target_location['longitude'],
+            target_location['range']
         )
 
         # Prepare the response

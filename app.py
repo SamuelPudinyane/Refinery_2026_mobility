@@ -334,7 +334,7 @@ def operator():
         location = json.loads(questions[0]['location'])
         print(location)
         
-        target_location = location[0]
+        target_location = location
         #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
         # Check if the user is within range

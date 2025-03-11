@@ -336,9 +336,9 @@ def operator():
         print("questions ",questions)
         if questions:
             location = json.loads(questions[0]['location'])
-            print("LOCATION ",location[0])
+            print("LOCATION ",location)
             
-            target_location = location[0]
+            target_location = location
             #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
             # Check if the user is within range
@@ -396,7 +396,12 @@ def delete_location(plant_section):
     print(locations)
     plant_section= plant_section
     print("plant section ",plant_section)
-    delete_from_super_admin(plant_section)
+    results=delete_from_super_admin(plant_section)
+    if results:
+        print(results)
+        return redirect(url_for('delete_location'))
+        
+
         
     return render_template("superAdmin_location_update.html",locations=locations)
 

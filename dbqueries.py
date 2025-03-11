@@ -796,8 +796,8 @@ def delete_from_super_admin(plant_section):
         cur = conn.cursor()
 
         # Delete Query
-        query = "DELETE FROM administrator WHERE plant_section=%s"
-        cur.execute(query, (plant_section))  # Fixed parameter order
+        query = "DELETE FROM plant_section_locations WHERE plant_section=%s"
+        cur.execute(query, (plant_section,))  # Fixed parameter order
 
         # Check if deletion was successful
         if cur.rowcount > 0:  # rowcount returns number of affected rows

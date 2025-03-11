@@ -815,59 +815,42 @@ def delete_from_super_admin(plant_section):
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
 
+from psycopg2 import sql
 
-def delete_from_checklist_questions(plant_section):
-    """Deletes an administrator from the PostgreSQL database."""
-    try:
-        # Connect to PostgreSQL
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Delete Query
-        query = "DELETE FROM plant_section_locations WHERE plant_section=%s"
-        cur.execute(query, (plant_section,))  # Fixed parameter order
-
-        # Check if deletion was successful
-        if cur.rowcount > 0:  # rowcount returns number of affected rows
-            conn.commit()
-            result = True  # Successfully deleted
-        else:
-            result = False  # No rows were deleted (admin_id not found)
-
-        # Close connection
-        cur.close()
-        conn.close()
-        return result
-
-    except psycopg2.Error as e:
-        print("Error deleting admin:", e)
-        return False  # Return False in case of an error
-
-
-def delete_administrators_by_plant_section(plant_section):
+def delete_all_data_from_all_tables():
     """
-    Deletes all rows from the administrator table where plant_section matches the given value.
-    
-    :param plant_section: The plant_section value to match for deletion.
+    Deletes all data from all tables in the database.
     """
     try:
         # Connect to the database
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        # SQL query to delete rows
-        query = """
-            DELETE FROM administrator
-            WHERE plant_section = %s;
-        """
-        
-        # Execute the query
-        cursor.execute(query, (plant_section,))
-        
+
+        # Disable foreign key checks (if needed)
+        cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
+
+        # Get a list of all tables in the database
+        cursor.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public';
+        """)
+        tables = cursor.fetchall()
+
+        # Iterate through each table and delete all data
+        for table in tables:
+            table_name = table[0]
+            print(f"Deleting all data from table: {table_name}")
+
+            # Use TRUNCATE for faster deletion (resets auto-increment counters)
+            cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
+                sql.Identifier(table_name)
+            ))
+
         # Commit the transaction
         conn.commit()
-        
-        print(f"Deleted {cursor.rowcount} rows where plant_section = '{plant_section}'.")
+        print("All data has been deleted from all tables.")
+
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
@@ -877,8 +860,5 @@ def delete_administrators_by_plant_section(plant_section):
         if conn:
             conn.close()
 
-
-delete_from_checklist_questions("JUST_LAB")
-delete_administrators_by_plant_section("JUST_LAB")
-delete_administrators_by_plant_section("GRANULATION_PLANT")
-delete_from_checklist_questions("GRANULATION_PLANT")
+# Example usage
+delete_all_data_from_all_tables()

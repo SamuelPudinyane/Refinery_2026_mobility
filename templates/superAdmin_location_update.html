@@ -5,7 +5,19 @@
 {% block content %}
 <div class="container">
     <h2 class="mt-4">Plant Section And Location</h2>
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        
+                        <div id="flash-message-container">
+                            {% for category, message in messages %}
+                              <div class="alert alert-{{ category }}" role="alert">
+                                {{ message }}
+                              </div>
+                            {% endfor %}
+                          </div>
+                       
+                    {% endif %}
+                {% endwith %}
     <!-- Form to Add Location -->
     <form action="/submit_location" method="POST" class="mt-3">
         

@@ -366,6 +366,7 @@ def operator():
 def submit_location():
     user=session['user']
     locations=get_all_locations()
+    print(locations)
     if request.method=='POST':
         
         plant_section= request.form["plant_section"]
@@ -373,9 +374,10 @@ def submit_location():
         longitude= request.form["longitude"]
         range= request.form["range"]
         user_id=user['id']
-        locations=insert_into_section_location(plant_section, latitude, longitude, range, user_id)
-        if "message" in locations:
+        location=insert_into_section_location(plant_section, latitude, longitude, range, user_id)
+        if "message" in location:
             flash("plant section already exist")
+            return redirect(url_for("submit_location"))
         else:
             flash("successfully safed")
             return redirect(url_for("submit_location"))

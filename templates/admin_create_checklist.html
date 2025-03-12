@@ -18,7 +18,7 @@
   <a href="{{ url_for('admin_view_answers') }}" class="btn btn-dark btn-sm my-1">
     <i class="fas fa-clipboard-list me-2"></i>VIEW ANSWERS
 </a>
-<a href="{{ url_for('admin_veiw_unanswered_questions') }}" class="btn btn-dark btn-sm my-1">
+<a href="{{ url_for('admin_view_unanswered_questions') }}" class="btn btn-dark btn-sm my-1">
   <i class="fas fa-edit me-2"></i>UNANSWERED QUESTIONS
 </a>
 </div>
@@ -35,7 +35,7 @@
                 <span class="input-group-text">
                     <i class="fas fa-filter"></i>
                 </span>
-                <select class="form-select" name="section" id="section">
+                <select class="form-select" name="section" id="section" required>
                     <option value="">-- Filter --</option>
                     {% for item in plant_sections %}
                         <option value="{{ item }}">{{ item }}</option>
@@ -51,7 +51,7 @@
                 <span class="input-group-text">
                     <i class="fas fa-user"></i>
                 </span>
-                <select class="form-select" name="select">
+                <select class="form-select" name="select" required>
                     <option value="">-- Select Operator --</option>
                     {% if operators %}
                         {% for operator in operators %}

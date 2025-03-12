@@ -310,8 +310,11 @@ def admin_create_checklist():
                 operator=get_operator_with_id(select)
                 print(latitute_longitude)
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                
-                insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
+                if len(operators_questions)>0:
+                    insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
+                    flash("Account was created Successfully")
+                else:
+                    flash("please choose atleast one or more questions")
             # Process the form data (e.g., save to database)
             return redirect(url_for("admin_create_checklist")) #render_template("tion.html",operators_questions=operators_questions)
 
@@ -319,20 +322,35 @@ def admin_create_checklist():
     return render_template('admin_create_checklist.html', operators=operators, questions=questions,plant_sections=plant_sections)
 
 
-@app.route('/admin_view_answers',methods=['GET','POST'])
+@app.route('/admin_view_answers', methods=['GET', 'POST'])
 def admin_view_answers():
-    plant_sections=get_all_plant_sections()
-    answers=get_all_answered_questions()
-    print("answers ", answers)
-    return render_template("admin_view_answers.html",answers=answers,plant_sections=plant_sections)
+    plant_sections = get_all_plant_sections()  # Get all plant sections for the dropdown
 
-@app.route('/admin_veiw_unanswered_questions',methods=['GET','POST'])
-def admin_veiw_unanswered_questions():
-    return render_template("admin_view_answers.html")
+    if request.method == "POST":
+        selected_section = request.form.get('section')  # Get the selected section from the form
+        if selected_section:
+            # Filter answers based on the selected section
+            answers = get_all_answered_questions_by_plant_section(selected_section)
+        else:
+            # If no section is selected, return all answers
+            answers = get_all_answered_questions()
+        
+        # Return the filtered answers and plant sections to the template
+        return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
+
+    # For GET requests, return all answers
+    answers = get_all_answered_questions()
+    return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
+
+
+@app.route('/admin_view_unanswered_questions',methods=['GET','POST'])
+def admin_view_unanswered_questions():
+    return render_template("admin_view_unanswered_questions.html")
 
 @app.route('/api/answered_questions', methods=['GET'])
 def get_answered_questions():
     plant_section = request.args.get('plant_section')  # Get plant_section from query parameters
+  
     if not plant_section:
         return jsonify({"error": "plant_section parameter is required"}), 400
 
@@ -400,6 +418,8 @@ def operator():
 def get_answers():
     data=""
     return jsonify(data)
+
+
 
 
 @app.route("/submit_location", methods=["GET","POST"])

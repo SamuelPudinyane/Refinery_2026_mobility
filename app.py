@@ -51,6 +51,11 @@ def login():
 
     return render_template('index.html')
 
+@app.route('/logout',methods=['GET','POST'])
+def logout():
+    session.clear()
+    return render_template("index.html")
+
 
 @app.route('/master_add',methods=['GET','POST'])
 def master_add():
@@ -343,6 +348,8 @@ def admin_view_answers():
     return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
 
 
+
+
 @app.route('/admin_view_unanswered_questions',methods=['GET','POST'])
 def admin_view_unanswered_questions():
     return render_template("admin_view_unanswered_questions.html")
@@ -400,7 +407,7 @@ def operator():
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])
                 response_data['operators_questions'] = questions
-
+            print("answers ",response_data)
             # Return the result as JSON
             return jsonify(response_data)
 
@@ -414,10 +421,7 @@ def operator():
     return render_template('operator.html', operators_questions=questions)
 
 
-@app.route('/api/answers', methods=['GET'])
-def get_answers():
-    data=""
-    return jsonify(data)
+
 
 
 

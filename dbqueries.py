@@ -1038,9 +1038,9 @@ def get_all_answered_questions_by_plant_section(plant_section):
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE plant_section = %s
-              AND checklist_answers IS NOT NULL
-              AND checklist_answers != 'null'
-              AND checklist_answers != ''
+              OR checklist_answers IS NOT NULL
+              OR checklist_answers != 'null'
+              OR checklist_answers != ''
         """)
         
         cur.execute(select_query, (plant_section,))
@@ -1088,9 +1088,9 @@ def get_all_answered_questions():
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE checklist_answers IS NOT NULL 
-              AND checklist_answers != 'null' 
-              AND checklist_answers != ''
-            LIMIT 10;
+              OR checklist_answers != 'null' 
+              OR checklist_answers != ''
+           ;
         """)
         
         cur.execute(select_query)
@@ -1110,6 +1110,57 @@ def get_all_answered_questions():
         if conn:
             cur.close()
             conn.close()  # Ensure the connection is closed
+
+
+
+def delete_all_unanswered_questions(plant_section):
+    """
+    Deletes all records from the questions table where checklist_answers is NULL, 'null', or an empty string.
+    
+    Returns:
+        int: The number of rows deleted, or None if an error occurs.
+    """
+    conn = None
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            print("Failed to connect to the database.")
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Delete query to remove records with unanswered questions
+        delete_query ="""
+            DELETE FROM public.questions
+            WHERE plant_section=%s AND (checklist_answers IS NULL 
+               OR checklist_answers = 'null' 
+               OR checklist_answers = '');
+        """
+        
+        # Execute the delete query
+        cur.execute(delete_query,(plant_section,))
+        
+        # Get the number of rows deleted
+        rows_deleted = cur.rowcount
+        
+        # Commit the transaction
+        conn.commit()
+        
+        return rows_deleted  # Return the number of rows deleted
+
+    except psycopg2.Error as e:
+        print("Error deleting unanswered questions:", e)
+        if conn:
+            conn.rollback()  # Rollback the transaction in case of an error
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+
 
 # def get_all():
 #     """Retrieves all records from the questions table."""

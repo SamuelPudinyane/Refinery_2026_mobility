@@ -5,7 +5,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
                         get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
-                        get_all_answered_questions,
+                        get_all_answered_questions,delete_all_unanswered_questions
                        )
 from datetime import datetime
 import json
@@ -428,8 +428,11 @@ def delete_location(plant_section):
     plant_section= plant_section
     print("plant section ",plant_section)
     results=delete_from_super_admin(plant_section)
+
+    unanswered_questions=delete_all_unanswered_questions(plant_section)
+    
     if results:
-        print(results)
+        print("location deleted ",results, "deleted unanswered questions ",unanswered_questions)
         return redirect(url_for('delete_location'))
         
 

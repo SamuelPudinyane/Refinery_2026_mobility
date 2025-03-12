@@ -418,7 +418,7 @@ def operator():
                         'answer': answer,
                         'reason': reason,
                     })
-
+            print("answers ",response_data)
             # Return the result as JSON
             return jsonify(response_data)
 

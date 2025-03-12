@@ -680,7 +680,7 @@ def get_all_locations_by_plant_section(plant_section):
                 query = """
                 SELECT id, plant_section, latitude, longitude, range, user_id
                 FROM plant_section_locations
-                WHERE plant_section = %s
+                WHERE plant_section = %s ORDER BY id DESC LIMIT 1
                 """
                 cursor.execute(query, (plant_section,))  # Fixed parameter passing
 
@@ -778,6 +778,45 @@ def get_all_questions_by_company_number(company_number):
         """
         
         cur.execute(select_query,(company_number,))
+        rows = cur.fetchall()
+
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+
+        return results  # Return all records as a list of dictionaries
+
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+
+
+def get_all_questions_by_company_number():
+    """Retrieves all records from the questions table."""
+    conn = None
+    results = []
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Select query to fetch all records
+        select_query = """
+        SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+               company_number, operator, operators_location, time_stamp
+        FROM public.questions LIMIT 20;
+        """
+        
+        cur.execute(select_query,)
         rows = cur.fetchall()
 
         # Convert the results to a list of dictionaries

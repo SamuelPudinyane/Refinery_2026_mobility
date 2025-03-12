@@ -774,7 +774,7 @@ def get_all_questions_by_company_number(company_number):
         select_query = """
         SELECT id, checklist_questions, checklist_answers, location, plant_section, 
                company_number, operator, operators_location, time_stamp
-        FROM public.questions WHERE company_number=%s AND (checklist_answers IS NULL OR checklist_answers = 'null' OR checklist_answers = '');
+        FROM public.questions WHERE company_number=%s AND (checklist_answers IS NULL OR checklist_answers = 'null' OR checklist_answers = '') ORDER BY id DESC LIMIT 1;
         """
         
         cur.execute(select_query,(company_number,))

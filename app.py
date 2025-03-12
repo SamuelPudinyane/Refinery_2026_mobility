@@ -418,8 +418,8 @@ def operator():
                         'answer': answer,
                         'reason': reason,
                     })
-                if response_data['user_answers']['answer']:
-                    print("answers ",response_data)
+                # if response_data['user_answers']['answer']:
+                print("answers ",response_data)
             # Return the result as JSON
             return jsonify(response_data)
 

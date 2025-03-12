@@ -409,7 +409,7 @@ def operator():
                 for q in questions:
                     question_id = q['id']
                     question_text = q['question']
-                    answer = user_answers.get(f'question_{question_id}', 'No answer provided')
+                    answer = user_answers.get(f'question_{question_id}')
                     reason = user_answers.get(f'reason_{question_id}', 'No reason provided')
 
                     response_data['user_answers'].append({
@@ -418,7 +418,8 @@ def operator():
                         'answer': answer,
                         'reason': reason,
                     })
-            print("answers ",response_data)
+                if response_data['answer']:
+                    print("answers ",response_data)
             # Return the result as JSON
             return jsonify(response_data)
 

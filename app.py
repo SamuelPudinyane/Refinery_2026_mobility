@@ -375,7 +375,7 @@ def operator():
         user_lat = user_data.get('latitude')
         user_lon = user_data.get('longitude')
         user_answers = user_data.get('answers', {})  # Get user answers
-        print("answers ",user_answers)
+
         # Store the user's location in the session
         session['user_lat'] = user_lat
         session['user_lon'] = user_lon
@@ -397,16 +397,28 @@ def operator():
             response_data = {
                 'status': 'success',
                 'is_within_range': is_within,
-                'user_answers': user_answers,  # Include user answers in the response
+                'user_answers': [],  # Initialize an empty list for mapped answers
             }
 
             # Include operators_questions in the response if within range
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])
                 response_data['operators_questions'] = questions
-            
-            if response_data['user_answers']:
-                print("answers ",response_data)
+
+                # Map questions and answers
+                for q in questions:
+                    question_id = q['id']
+                    question_text = q['question']
+                    answer = user_answers.get(f'question_{question_id}', 'No answer provided')
+                    reason = user_answers.get(f'reason_{question_id}', 'No reason provided')
+
+                    response_data['user_answers'].append({
+                        'question_id': question_id,
+                        'question': question_text,
+                        'answer': answer,
+                        'reason': reason,
+                    })
+
             # Return the result as JSON
             return jsonify(response_data)
 
@@ -416,7 +428,6 @@ def operator():
         questions = json.loads(questions[0]['checklist_questions'])
 
     return render_template('operator.html', operators_questions=questions)
-
 
 
 

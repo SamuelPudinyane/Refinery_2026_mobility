@@ -823,8 +823,254 @@ def delete_from_super_admin(plant_section):
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
 
+def udate_question(checklist_answers, operators_location=None ):
+    """Inserts a new question entry into the PostgreSQL database"""
+    conn = None
+    inserted_data = None
+    print(type(checklist_answers), type(operators_location))
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            return None  # Return None if connection fails
+        
+        cur = conn.cursor()
+        # Convert lists and dicts to JSON strings
+        if isinstance(checklist_answers, (list, dict)):
+            checklist_answers = json.dumps(checklist_answers)
+        if isinstance(operators_location, (list, dict)):
+            operators_location = json.dumps(operators_location)
+        # Insert Query
+        insert_query = """
+        UPDATE public.questions SET(
+            checklist_answers, operators_location)
+        VALUES (%s, %s)
+        RETURNING id, checklist_questions, checklist_answers, location, plant_section, company_number, operator, operators_location, time_stamp;
+        """
+        cur.execute(insert_query, (checklist_answers,operators_location))
+
+        # Fetch the newly inserted data
+        inserted_data = cur.fetchone()
+
+        # Commit the transaction
+        conn.commit()
+
+        return inserted_data  # Return all inserted data
+
+    except psycopg2.Error as e:
+        print("Error inserting question:", e)
+        if conn:
+            conn.rollback()  # Rollback if an error occurs
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
 
 
+
+def get_all_questions_by_plant_section_that_are_not_answered(plant_section):
+    """
+    Retrieves all records from the questions table for a specific plant section
+    where the checklist_answers are either NULL, 'null', or an empty string.
+    
+    Args:
+        plant_section (str): The plant section to filter the questions by.
+    
+    Returns:
+        list: A list of dictionaries representing the records, or None if an error occurs.
+    """
+    conn = None
+    results = []
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            print("Failed to connect to the database.")
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Select query to fetch all records for the specified plant section
+        select_query = sql.SQL("""
+            SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+                   company_number, operator, operators_location, time_stamp
+            FROM public.questions
+            WHERE plant_section = %s
+              AND (checklist_answers IS NULL 
+                   OR checklist_answers = 'null' 
+                   OR checklist_answers = '');
+        """)
+        
+        # Execute the query with the plant_section parameter
+        cur.execute(select_query, (plant_section,))
+        rows = cur.fetchall()
+
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+
+        return results  # Return all records as a list of dictionaries
+
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+
+
+
+def get_all_questions_by_plant_section(plant_section):
+    """
+    Retrieves all records from the questions table for a specific plant section.
+    
+    Args:
+        plant_section (str): The plant section to filter the questions by.
+    
+    Returns:
+        list: A list of dictionaries representing the records, or None if an error occurs.
+    """
+    conn = None
+    results = []
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            print("Failed to connect to the database.")
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Select query to fetch all records for the specified plant section
+        select_query = sql.SQL("""
+            SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+                   company_number, operator, operators_location, time_stamp
+            FROM public.questions
+            WHERE plant_section = %s;
+        """)
+        
+        # Execute the query with the plant_section parameter
+        cur.execute(select_query, (plant_section,))
+        rows = cur.fetchall()
+
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+
+        return results  # Return all records as a list of dictionaries
+
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+
+
+
+
+def get_all_answered_questions_by_plant_section(plant_section):
+    """
+    Retrieves all records from the questions table for a specific plant section
+    where checklist_answers is not null or empty.
+    """
+    conn = None
+    results = []
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Select query to fetch all records
+        select_query = sql.SQL("""
+            SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+                   company_number, operator, operators_location, time_stamp
+            FROM public.questions
+            WHERE plant_section = %s
+              AND checklist_answers IS NOT NULL
+              AND checklist_answers != 'null'
+              AND checklist_answers != ''
+        """)
+        
+        cur.execute(select_query, (plant_section,))
+        rows = cur.fetchall()
+
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+
+        return results  # Return all records as a list of dictionaries
+
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
+
+
+
+def get_all_answered_questions():
+    """
+    Retrieves the top 10 records from the questions table where checklist_answers is not null or empty.
+    
+    Returns:
+        list: A list of dictionaries representing the records, or None if an error occurs.
+    """
+    conn = None
+    results = []
+
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        if conn is None:
+            print("Failed to connect to the database.")
+            return None  # Return None if connection fails
+
+        cur = conn.cursor()
+
+        # Select query to fetch the top 10 records
+        select_query = sql.SQL("""
+            SELECT id, checklist_questions, checklist_answers, location, plant_section, 
+                   company_number, operator, operators_location, time_stamp
+            FROM public.questions
+            WHERE checklist_answers IS NOT NULL 
+              AND checklist_answers != 'null' 
+              AND checklist_answers != ''
+            LIMIT 10;
+        """)
+        
+        cur.execute(select_query)
+        rows = cur.fetchall()
+
+        # Convert the results to a list of dictionaries
+        columns = [desc[0] for desc in cur.description]  # Get column names
+        results = [dict(zip(columns, row)) for row in rows]
+
+        return results  # Return all records as a list of dictionaries
+
+    except psycopg2.Error as e:
+        print("Error fetching questions:", e)
+        return None  # Indicate failure
+
+    finally:
+        if conn:
+            cur.close()
+            conn.close()  # Ensure the connection is closed
 
 # def get_all():
 #     """Retrieves all records from the questions table."""

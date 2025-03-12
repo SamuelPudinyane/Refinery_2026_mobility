@@ -1,0 +1,125 @@
+
+
+{% extends "base.html" %}
+{% block title %}ADMINISTRATORS{% endblock %}
+{% block sidebar %}
+<div class="container-fluid add-admin text-center py-3">
+  <a href="{{ url_for('admin_create_checklist') }}" class="btn btn-dark btn-sm my-1">
+      <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST FOR OPERATOR
+  </a>
+  <a href="{{ url_for('admin_create_question') }}" class="btn btn-dark btn-sm my-1">
+      <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
+  </a>
+  <a href="{{ url_for('admin_delete_question') }}" class="btn btn-dark btn-sm my-1">
+      <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
+  </a>
+  
+  <a href="{{ url_for('admin_view_answers') }}" class="btn btn-secondary btn-sm my-1">
+    <i class="fas fa-clipboard-list me-2"></i>VIEW ANSWERS
+</a>
+
+<a href="{{ url_for('admin_veiw_unanswered_questions') }}" class="btn btn-dark btn-sm my-1">
+    <i class="fas fa-edit me-2"></i>UNANSWERED QUESTIONS
+</a>
+</div>
+{% endblock %}
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center">Checklist Answers</h1>
+    {% if answers %}
+    {% for answer in answers %}
+    <div class="mb-3">
+        <label for="plant-section-filter" class="form-label">Filter by Plant Section:</label>
+        <select id="plant-section-filter" class="form-select">
+            <option value="Section1">Section 1</option>
+            <option value="Section2">Section 2</option>
+            <option value="Section3">Section 3</option>
+            <!-- Add more options dynamically if needed -->
+        </select>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 id="plant-section">Plant Section: Loading...</h3>
+            <p><strong>Operator:</strong> <span id="operator">Loading...</span></p>
+            <p><strong>Timestamp:</strong> <span id="timestamp">Loading...</span></p>
+        </div>
+        <div class="card-body">
+            <h4>Questions and Answers:</h4>
+            <div id="questions-container">
+                <!-- Questions and answers will be dynamically inserted here -->
+            </div>
+            <div class="location-info">
+                <h4>Location:</h4>
+                <p><strong>Latitude:</strong> <span id="latitude">Loading...</span></p>
+                <p><strong>Longitude:</strong> <span id="longitude">Loading...</span></p>
+                <p><strong>Range:</strong> <span id="range">Loading...</span> meters</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No answers to be displayed yet</p>
+    {% endif %}
+    {% endif %}
+</div>
+
+    <script>
+        
+            // Function to fetch data based on plant_section
+            async function fetchDataByPlantSection(plantSection) {
+                try {
+                    const response = await fetch(`/api/answered_questions?plant_section=${plantSection}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch data');
+                    }
+                    const data = await response.json();
+                    updatePage(data);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('plant-section').innerText = 'Plant Section: Error loading data';
+                }
+            }
+        
+            // Function to update the page with fetched data
+            function updatePage(data) {
+                // Update header information
+                document.getElementById('plant-section').innerText = `Plant Section: ${data[0].plant_section}`;
+                document.getElementById('operator').innerText = data[0].operator;
+                document.getElementById('timestamp').innerText = data[0].time_stamp;
+        
+                // Update questions and answers
+                const questionsContainer = document.getElementById('questions-container');
+                questionsContainer.innerHTML = ''; // Clear existing content
+                data.forEach((question, index) => {
+                    const answerBlock = document.createElement('div');
+                    answerBlock.className = 'answer-block';
+                    answerBlock.innerHTML = `
+                        <p><strong>Question ${index + 1}:</strong> ${question.checklist_questions}</p>
+                        <p><strong>Answer:</strong> ${question.checklist_answers}</p>
+                    `;
+                    questionsContainer.appendChild(answerBlock);
+                });
+        
+                // Update location information
+                document.getElementById('latitude').innerText = data[0].location.latitude;
+                document.getElementById('longitude').innerText = data[0].location.longitude;
+                document.getElementById('range').innerText = data[0].location.range;
+            }
+        
+            // Event listener for plant section filter
+            document.getElementById('plant-section-filter').addEventListener('change', function() {
+                const selectedPlantSection = this.value;
+                fetchDataByPlantSection(selectedPlantSection);
+            });
+        
+            // Fetch initial data when the page loads
+            window.onload = function() {
+                const initialPlantSection = document.getElementById('plant-section-filter').value;
+                fetchDataByPlantSection(initialPlantSection);
+            };
+        
+        
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% endblock %}

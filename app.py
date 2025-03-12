@@ -4,7 +4,8 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        get_all_operators,insert_into_checklist_questions,get_all_questions,delete_selected_questions,get_one_question,
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
-                        get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin
+                        get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
+                        get_all_answered_questions,
                        )
 from datetime import datetime
 import json
@@ -318,6 +319,28 @@ def admin_create_checklist():
     return render_template('admin_create_checklist.html', operators=operators, questions=questions,plant_sections=plant_sections)
 
 
+@app.route('/admin_view_answers',methods=['GET','POST'])
+def admin_view_answers():
+    plant_sections=get_all_plant_sections()
+    answers=get_all_answered_questions()
+    print("answers ", answers)
+    return render_template("admin_view_answers.html",answers=answers,plant_sections=plant_sections)
+
+@app.route('/admin_veiw_unanswered_questions',methods=['GET','POST'])
+def admin_veiw_unanswered_questions():
+    return render_template("admin_view_answers.html")
+
+@app.route('/api/answered_questions', methods=['GET'])
+def get_answered_questions():
+    plant_section = request.args.get('plant_section')  # Get plant_section from query parameters
+    if not plant_section:
+        return jsonify({"error": "plant_section parameter is required"}), 400
+
+    results=get_all_answered_questions_by_plant_section(plant_section)
+    return jsonify(results)  # Return all records as JSON
+
+
+
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
     user = session['user']
@@ -371,6 +394,13 @@ def operator():
 
         return render_template('operator.html', operators_questions=questions)
     return render_template('operator.html', operators_questions=questions)
+
+
+@app.route('/api/answers', methods=['GET'])
+def get_answers():
+    data=""
+    return jsonify(data)
+
 
 @app.route("/submit_location", methods=["GET","POST"])
 def submit_location():

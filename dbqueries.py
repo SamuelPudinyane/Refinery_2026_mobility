@@ -796,7 +796,7 @@ def get_all_questions_by_company_number(company_number):
             conn.close()  # Ensure the connection is closed
 
 
-def get_all_questions_by_company_number():
+def get_all_questions_limited():
     """Retrieves all records from the questions table."""
     conn = None
     results = []

@@ -404,7 +404,9 @@ def operator():
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])
                 response_data['operators_questions'] = questions
-            print("answers ",response_data)
+            
+            if response_data['user_answers']:
+                print("answers ",response_data)
             # Return the result as JSON
             return jsonify(response_data)
 

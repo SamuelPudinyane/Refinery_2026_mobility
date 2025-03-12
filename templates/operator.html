@@ -188,6 +188,41 @@
           
             // Stop watching when the page is unloaded
             window.onbeforeunload = stopWatchingLocation;
-          
+          // Function to handle form submission
+document.querySelector('form').addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Collect form data
+    const formData = new FormData(this);
+    const answers = {};
+
+    // Loop through form data and structure it
+    for (const [key, value] of formData.entries()) {
+        answers[key] = value;
+    }
+
+    // Send the answers to the server
+    fetch('/operator', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            latitude: sessionStorage.getItem('user_lat'), // Get stored latitude
+            longitude: sessionStorage.getItem('user_lon'), // Get stored longitude
+            answers: answers, // Include user answers
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Server Response:', data);
+            // Handle the response (e.g., display a success message)
+            alert('Checklist submitted successfully!');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to submit checklist.');
+        });
+});
     </script>
 {% endblock %}

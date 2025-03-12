@@ -365,30 +365,26 @@ def get_answered_questions():
     return jsonify(results)  # Return all records as JSON
 
 
-
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
-    user = session['user']
+    user = session.get('user')  # Get the user from the session
 
     if request.method == 'POST':
-        # Get the user's location from the request
-        user_location = request.json
-        user_lat = user_location['latitude']
-        user_lon = user_location['longitude']
-
+        # Get the user's location and answers from the request
+        user_data = request.json
+        user_lat = user_data.get('latitude')
+        user_lon = user_data.get('longitude')
+        user_answers = user_data.get('answers', {})  # Get user answers
+        print("answers ",user_answers)
         # Store the user's location in the session
         session['user_lat'] = user_lat
         session['user_lon'] = user_lon
 
         # Get the target location and range
         questions = get_all_questions_by_company_number(user['company_number'])
-        print("questions ",questions)
         if questions:
             location = json.loads(questions[0]['location'])
-            print("LOCATION ",location)
-            
             target_location = location[0]
-            #target={"latitude":-26.248538,"longitude":27.854032,"range":2}
 
             # Check if the user is within range
             is_within = is_within_range(
@@ -401,6 +397,7 @@ def operator():
             response_data = {
                 'status': 'success',
                 'is_within_range': is_within,
+                'user_answers': user_answers,  # Include user answers in the response
             }
 
             # Include operators_questions in the response if within range
@@ -413,14 +410,10 @@ def operator():
 
     # For GET requests, render the template
     questions = get_all_questions_by_company_number(user['company_number'])
-    print("questions ",questions)
     if questions:
         questions = json.loads(questions[0]['checklist_questions'])
 
-        return render_template('operator.html', operators_questions=questions)
     return render_template('operator.html', operators_questions=questions)
-
-
 
 
 

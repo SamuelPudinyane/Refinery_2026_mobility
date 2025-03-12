@@ -12,7 +12,7 @@
 
         <!-- Questions (initially hidden) -->
         <div id="questions" style="display: none;">
-            <form class="form-control" method="POST">
+            <form class="form-control" id="checklist-form">
                 <!-- Plant Section Label with Icon -->
                 {% if operators_questions | length > 0 %}
                     <label class="form-label">
@@ -24,58 +24,58 @@
                     <div class="container card card_add_admin">
                         <!-- Checklist Heading with Icon -->
                         <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
-        {% if operators_questions | length>0 %}
-                        {% for q in operators_questions %}
-                            <div class="mb-3">
-                                <!-- Question Label with Icon -->
-                                <label class="form-label">
-                                    {{ loop.index }}. {{ q.question }}
-                                </label>
-                                
-                                {% if q.question_type == "text" %}
-                                    <!-- Text Input with Icon -->
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-pencil-alt"></i>
-                                        </span>
-                                        <input type="text" class="form-control" name="question_{{ q.id }}" required>
-                                    </div>
-                                
-                                {% elif q.question_type == "radio" %}
-                                    {% for option in q.options[0] %}
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" 
-                                                   name="question_{{ q.id }}" 
-                                                   value="{{ option }}" 
-                                                   id="radio_{{ q.id }}_{{ option }}"
-                                                   data-reasoning="{{ q.reasoning }}"
-                                                   onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
-                                                   required>
-                                            <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
-                                               {{ option }}
-                                            </label>
+                        {% if operators_questions | length > 0 %}
+                            {% for q in operators_questions %}
+                                <div class="mb-3">
+                                    <!-- Question Label with Icon -->
+                                    <label class="form-label">
+                                        {{ loop.index }}. {{ q.question }}
+                                    </label>
+                                    
+                                    {% if q.question_type == "text" %}
+                                        <!-- Text Input with Icon -->
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </span>
+                                            <input type="text" class="form-control" name="question_{{ q.id }}" required>
                                         </div>
-                                    {% endfor %}
-        
-                                    {% if q.reasoning %}
-                                        <!-- Reasoning Input with Icon -->
-                                        <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
-                                            <label class="form-label">
-                                                <i class="fas fa-comment-dots me-2"></i>Provide a reason:
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text">
-                                                    <i class="fas fa-pencil-alt"></i>
-                                                </span>
-                                                <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                    
+                                    {% elif q.question_type == "radio" %}
+                                        {% for option in q.options[0] %}
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" 
+                                                       name="question_{{ q.id }}" 
+                                                       value="{{ option }}" 
+                                                       id="radio_{{ q.id }}_{{ option }}"
+                                                       data-reasoning="{{ q.reasoning }}"
+                                                       onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
+                                                       required>
+                                                <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
+                                                   {{ option }}
+                                                </label>
                                             </div>
-                                        </div>
+                                        {% endfor %}
+            
+                                        {% if q.reasoning %}
+                                            <!-- Reasoning Input with Icon -->
+                                            <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
+                                                <label class="form-label">
+                                                    <i class="fas fa-comment-dots me-2"></i>Provide a reason:
+                                                </label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control" name="reason_{{ q.id }}">
+                                                </div>
+                                            </div>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+                                </div>
+                            {% endfor %}
                         {% else %}
-                        <p>No questions available.</p>
+                            <p>No questions available.</p>
                         {% endif %}
                     </div>
         
@@ -108,121 +108,126 @@
             }
         }
         
-            let watchId;
-          
-            // Function to handle location updates
-            function displayLocation(position) {
-              const userLat = position.coords.latitude;
-              const userLon = position.coords.longitude;
-          
-              // Send the location to the server
-              fetch('/operator', {
+        let watchId;
+      
+        // Function to handle location updates
+        function displayLocation(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+
+            // Store the location in sessionStorage
+            sessionStorage.setItem('user_lat', userLat);
+            sessionStorage.setItem('user_lon', userLon);
+
+            // Send the location to the server
+            fetch('/operator', {
                 method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  latitude: userLat,
-                  longitude: userLon,
+                    latitude: userLat,
+                    longitude: userLon,
                 }),
-              })
+            })
                 .then((response) => response.json())
                 .then((data) => {
-                  // Handle the response (e.g., update the page)
-                  console.log(data);
-                  updatePage(data); // Update the page dynamically
+                    // Handle the response (e.g., update the page)
+                    console.log(data);
+                    updatePage(data); // Update the page dynamically
                 })
                 .catch((error) => {
-                  console.error('Error:', error);
+                    console.error('Error:', error);
                 });
-            }
-          
-            // Function to handle errors
-            function handleError(error) {
-              console.error('Error getting location:', error);
-            }
-          
-            // Start watching the user's location
-            function startWatchingLocation() {
-              if (navigator.geolocation) {
+        }
+      
+        // Function to handle errors
+        function handleError(error) {
+            console.error('Error getting location:', error);
+        }
+      
+        // Start watching the user's location
+        function startWatchingLocation() {
+            if (navigator.geolocation) {
                 watchId = navigator.geolocation.watchPosition(
-                  displayLocation,
-                  handleError,
-                  {
-                    enableHighAccuracy: true, // Use high accuracy mode
-                    timeout: 5000, // Maximum time to wait for a location (in milliseconds)
-                    maximumAge: 0, // Do not use a cached position
-                  }
+                    displayLocation,
+                    handleError,
+                    {
+                        enableHighAccuracy: true, // Use high accuracy mode
+                        timeout: 5000, // Maximum time to wait for a location (in milliseconds)
+                        maximumAge: 0, // Do not use a cached position
+                    }
                 );
-              } else {
+            } else {
                 console.error('Geolocation is not supported by this browser.');
-              }
             }
-          
-            // Stop watching the user's location
-            function stopWatchingLocation() {
-              if (watchId) {
+        }
+      
+        // Stop watching the user's location
+        function stopWatchingLocation() {
+            if (watchId) {
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
-              }
             }
-          
-            // Function to update the page dynamically
-            function updatePage(data) {
-              const statusDiv = document.getElementById('status');
-              const questionsDiv = document.getElementById('questions');
-          
-              if (data.is_within_range) {
+        }
+      
+        // Function to update the page dynamically
+        function updatePage(data) {
+            const statusDiv = document.getElementById('status');
+            const questionsDiv = document.getElementById('questions');
+      
+            if (data.is_within_range) {
                 // Display the questions if within range
                 statusDiv.innerHTML = 'You are within range!';
                 questionsDiv.style.display = 'block'; // Show the questions
-              } else {
+            } else {
                 // Display a message if outside the range
                 statusDiv.innerHTML = 'You are outside the range.';
                 questionsDiv.style.display = 'none'; // Hide the questions
-              }
             }
-          
-            // Start watching when the page loads
-            window.onload = startWatchingLocation;
-          
-            // Stop watching when the page is unloaded
-            window.onbeforeunload = stopWatchingLocation;
-          // Function to handle form submission
-document.querySelector('form').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent the default form submission
+        }
+      
+        // Start watching when the page loads
+        window.onload = startWatchingLocation;
+      
+        // Stop watching when the page is unloaded
+        window.onbeforeunload = stopWatchingLocation;
 
-    // Collect form data
-    const formData = new FormData(this);
-    const answers = {};
+        // Function to handle form submission
+        document.getElementById('checklist-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
 
-    // Loop through form data and structure it
-    for (const [key, value] of formData.entries()) {
-        answers[key] = value;
-    }
+            // Collect form data
+            const formData = new FormData(this);
+            const answers = {};
 
-    // Send the answers to the server
-    fetch('/operator', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            latitude: sessionStorage.getItem('user_lat'), // Get stored latitude
-            longitude: sessionStorage.getItem('user_lon'), // Get stored longitude
-            answers: answers, // Include user answers
-        }),
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            console.log('Server Response:', data);
-            // Handle the response (e.g., display a success message)
-            alert('Checklist submitted successfully!');
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            alert('Failed to submit checklist.');
+            // Loop through form data and structure it
+            for (const [key, value] of formData.entries()) {
+                answers[key] = value;
+            }
+
+            // Send the answers to the server
+            fetch('/operator', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: sessionStorage.getItem('user_lat'), // Get stored latitude
+                    longitude: sessionStorage.getItem('user_lon'), // Get stored longitude
+                    answers: answers, // Include user answers
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log('Server Response:', data);
+                    // Handle the response (e.g., display a success message)
+                    alert('Checklist submitted successfully!');
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Failed to submit checklist.');
+                });
         });
-});
     </script>
 {% endblock %}

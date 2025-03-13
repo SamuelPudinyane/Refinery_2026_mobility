@@ -438,7 +438,8 @@ def operator():
                 'is_within_range': is_within,
                 'user_answers': [],  # Initialize an empty list for mapped answers
             }
-
+            checklist_id=questions[0]['id']
+            print("my_id ",checklist_id)
             # Include operators_questions in the response if within range
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])

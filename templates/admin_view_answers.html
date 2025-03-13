@@ -65,8 +65,8 @@
                             {% for reply in answer.checklist_answers %}
                             <p><strong>Question:</strong> {{ reply.question }}</p>
                             <p><strong>Answer:</strong> {{ reply.answer }}</p>
-                            {% if reply.reason is not "null" %}
-                            <p><strong>Answer:</strong> {{ reply.reason }}</p>
+                            {% if reply.reason %}
+                            <p><strong>Reason:</strong> {{ reply.reason }}</p>
                             {% endif %}
                             {% endfor %}
                             

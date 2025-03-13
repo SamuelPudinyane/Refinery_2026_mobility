@@ -464,7 +464,7 @@ def operator():
                 response=[response_data['user_answers']]
                 print("response ", response)
                 # Store the answers in the database
-                # store_answers(checklist_id,response)
+                store_answers(checklist_id,response)
 
             # Return the result as JSON
             return jsonify(response_data)

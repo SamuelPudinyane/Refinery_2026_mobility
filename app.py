@@ -447,12 +447,14 @@ def operator():
                 print("questions ",questions)
                 # Map questions and answers
                 for q in questions:
+                    
                     question_id = q['id']
                     question_text = q['question']
                     answer = user_answers.get(f'question_{question_id}')
                     reason = user_answers.get(f'reason_{question_id}')
 
                     response_data['user_answers'].append({
+                        'checklist_id':checklist_id,
                         'question_id': question_id,
                         'question': question_text,
                         'answer': answer,

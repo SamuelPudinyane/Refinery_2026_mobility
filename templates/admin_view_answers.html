@@ -61,8 +61,14 @@
                     <div class="card-body">
                         <h4>Questions and Answers:</h4>
                         <div>
-                            <p><strong>Question:</strong> {{ answer.checklist_questions }}</p>
-                            <p><strong>Answer:</strong> {{ answer.checklist_answers }}</p>
+                            {% for reply in answer%}
+                            <p><strong>Question:</strong> {{ reply.question }}</p>
+                            <p><strong>Answer:</strong> {{ reply.answer }}</p>
+                            {% if reply.reason | length>0 %}
+                            <p><strong>Answer:</strong> {{ reply.reason }}</p>
+                            {% endif %}
+                            {% endfor %}
+                            
                         </div>
                         <div class="location-info">
                             <h4>Location:</h4>

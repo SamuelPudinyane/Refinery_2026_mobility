@@ -409,7 +409,8 @@ def get_answered_questions():
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
     user = session.get('user')  # Get the user from the session
-
+    something=get_all_answered_questions()
+    print("something ",something)
     if request.method == 'POST':
         # Get the user's location and answers from the request
         user_data = request.json

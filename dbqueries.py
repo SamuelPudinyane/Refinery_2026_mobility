@@ -1038,9 +1038,9 @@ def get_all_answered_questions_by_plant_section(plant_section):
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE plant_section = %s AND
-              checklist_answers IS NOT NULL
-              OR checklist_answers != 'null'
-              OR checklist_answers != ''
+              (checklist_answers IS NOT NULL
+              AND checklist_answers != 'null'
+              AND checklist_answers != '') LIMIT 20
         """)
         
         cur.execute(select_query, (plant_section,))

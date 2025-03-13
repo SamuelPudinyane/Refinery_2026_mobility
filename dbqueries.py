@@ -1178,12 +1178,16 @@ def store_answers(id, checklist_answers):
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # Convert the list of dictionaries to a JSON string
+        checklist_answers_json = json.dumps(checklist_answers)
+
+
         # Update the checklist_answers column in the database
         cur.execute("""
             UPDATE questions
             SET checklist_answers = %s
             WHERE id = %s
-        """, (checklist_answers, id))
+        """, (checklist_answers_json, id))
 
         conn.commit()
         return True  # Return True if the update was successful
@@ -1194,6 +1198,9 @@ def store_answers(id, checklist_answers):
         if conn:
             cur.close()
             conn.close()
+
+
+
 # def get_all():
 #     """Retrieves all records from the questions table."""
 #     conn = None

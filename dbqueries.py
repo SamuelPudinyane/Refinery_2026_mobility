@@ -1065,7 +1065,7 @@ def get_all_answered_questions_by_plant_section(plant_section):
 
 def get_all_answered_questions():
     """
-    Retrieves the top 10 records from the questions table where checklist_answers is not null or empty.
+    Retrieves all records from the questions table where checklist_answers is not null, not 'null', and not empty.
     
     Returns:
         list: A list of dictionaries representing the records, or None if an error occurs.
@@ -1082,15 +1082,14 @@ def get_all_answered_questions():
 
         cur = conn.cursor()
 
-        # Select query to fetch the top 10 records
+        # Select query to fetch records with valid checklist_answers
         select_query = sql.SQL("""
             SELECT id, checklist_questions, checklist_answers, location, plant_section, 
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
-            WHERE checklist_answers IS NOT NULL 
-              OR checklist_answers != 'null' 
-              OR checklist_answers != ''
-           ;
+            WHERE checklist_answers IS NOT NULL
+              AND checklist_answers != 'null'
+              AND checklist_answers != ''
         """)
         
         cur.execute(select_query)
@@ -1110,7 +1109,6 @@ def get_all_answered_questions():
         if conn:
             cur.close()
             conn.close()  # Ensure the connection is closed
-
 
 
 def delete_all_unanswered_questions(plant_section):

@@ -461,7 +461,7 @@ def operator():
                         'reason': reason,
                     })
                 print("users answers are here ",response_data)
-                response=[response_data['user_answers']]
+                response=response_data['user_answers']
                 print("response ", response)
                 # Store the answers in the database
                 output=store_answers(checklist_id,response)

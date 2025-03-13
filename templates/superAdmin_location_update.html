@@ -3,6 +3,10 @@
 {% block title %}Plant Section Locations{% endblock %}
 
 {% block content %}
+<!-- ADD LOCATION Button (pushed to the right) -->
+<a href="{{ url_for('register') }}" class="btn btn-success btn-sm my-1 ms-auto">
+    <i class="fas fa-home-alt me-2"></i>BACK
+</a>
 <div class="container">
     <h2 class="mt-4">Plant Section And Location</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -81,4 +85,15 @@
         </tbody>
     </table>
 </div>
+<script>
+    // Flash message fade-out
+    setTimeout(function() {
+        let flashMessage = document.getElementById("flash-message-container");
+        if (flashMessage) {
+          flashMessage.style.transition = "opacity 0.5s ease-out";
+          flashMessage.style.opacity = "0";
+          setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
+        }
+      }, 4000); // 4000ms = 4 seconds
+</script>
 {% endblock %}

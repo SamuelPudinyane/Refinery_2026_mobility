@@ -21,11 +21,27 @@
             <a href="{{ url_for('submit_location') }}" class="btn btn-success btn-sm my-1 ms-auto">
                 <i class="fas fa-map-marker-alt me-2"></i>ADD LOCATION
             </a>
+            <a href="{{ url_for('logout') }}" class="btn btn-success btn-sm my-1 ms-auto">
+                <i class="fas fa-right-from-bracket"></i> LOGOUT
+            </a>
         </div>
     </nav>
     
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="card p-4 register-card">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                
+                <div id="flash-message-container">
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }}" role="alert">
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  </div>
+               
+            {% endif %}
+        {% endwith %}
             <h2 class="text-center mb-4">Register</h2>
             <form action="/register" method="POST">
                 <!-- Username Field with Icon -->
@@ -89,5 +105,16 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Flash message fade-out
+      setTimeout(function() {
+        let flashMessage = document.getElementById("flash-message-container");
+        if (flashMessage) {
+          flashMessage.style.transition = "opacity 0.5s ease-out";
+          flashMessage.style.opacity = "0";
+          setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
+        }
+      }, 4000); // 4000ms = 4 seconds
+    </script>
 </body>
 </html>

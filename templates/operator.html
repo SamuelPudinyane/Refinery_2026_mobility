@@ -89,27 +89,8 @@
     </div>
 
     <script>
-        function toggleReasonInput(questionId, selectedOption) {
-            const reasonDiv = document.getElementById(`reason_${questionId}`);
-            
-            // Find the selected radio button
-            const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
-            
-            if (!selectedRadio) return; // No selection, do nothing
-            
-            const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
-
-            // Check if we need to show the reason input
-            if ((reasoning === "yes" && selectedOption === "YES") || 
-                (reasoning === "no" && selectedOption === "NO")) {
-                reasonDiv.style.display = "block";
-            } else {
-                reasonDiv.style.display = "none";
-            }
-        }
-        
         let watchId;
-      
+
         // Function to handle location updates
         function displayLocation(position) {
             const userLat = position.coords.latitude;
@@ -140,12 +121,12 @@
                     console.error('Error:', error);
                 });
         }
-      
+
         // Function to handle errors
         function handleError(error) {
             console.error('Error getting location:', error);
         }
-      
+
         // Start watching the user's location
         function startWatchingLocation() {
             if (navigator.geolocation) {
@@ -162,7 +143,7 @@
                 console.error('Geolocation is not supported by this browser.');
             }
         }
-      
+
         // Stop watching the user's location
         function stopWatchingLocation() {
             if (watchId) {
@@ -170,12 +151,12 @@
                 watchId = null;
             }
         }
-      
+
         // Function to update the page dynamically
         function updatePage(data) {
             const statusDiv = document.getElementById('status');
             const questionsDiv = document.getElementById('questions');
-      
+
             if (data.is_within_range) {
                 // Display the questions if within range
                 statusDiv.innerHTML = 'You are within range!';
@@ -186,12 +167,24 @@
                 questionsDiv.style.display = 'none'; // Hide the questions
             }
         }
-      
-        // Start watching when the page loads
-        window.onload = startWatchingLocation;
-      
-        // Stop watching when the page is unloaded
-        window.onbeforeunload = stopWatchingLocation;
+
+        // Function to toggle reason input visibility
+        function toggleReasonInput(questionId, selectedOption) {
+            const reasonDiv = document.getElementById(`reason_${questionId}`);
+            const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
+
+            if (!selectedRadio) return; // No selection, do nothing
+
+            const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
+
+            // Check if we need to show the reason input
+            if ((reasoning === "yes" && selectedOption === "YES") || 
+                (reasoning === "no" && selectedOption === "NO")) {
+                reasonDiv.style.display = "block";
+            } else {
+                reasonDiv.style.display = "none";
+            }
+        }
 
         // Function to handle form submission
         document.getElementById('checklist-form').addEventListener('submit', function (event) {
@@ -205,6 +198,9 @@
             for (const [key, value] of formData.entries()) {
                 answers[key] = value;
             }
+
+            // Stop watching the location
+            stopWatchingLocation();
 
             // Send the answers to the server
             fetch('/operator', {
@@ -229,5 +225,11 @@
                     alert('Failed to submit checklist.');
                 });
         });
+
+        // Start watching when the page loads
+        window.onload = startWatchingLocation;
+
+        // Stop watching when the page is unloaded
+        window.onbeforeunload = stopWatchingLocation;
     </script>
 {% endblock %}

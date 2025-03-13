@@ -1162,6 +1162,41 @@ def delete_all_unanswered_questions(plant_section):
             conn.close()  # Ensure the connection is closed
 
 
+
+def store_answers(id,user_answers):
+    """
+    Store the user's answers in the database.
+    
+    Args:
+        company_number (str): The company number of the operator.
+        user_answers (dict): The user's answers.
+        latitude (float): The user's latitude.
+        longitude (float): The user's longitude.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Insert the answers into the database
+        for key, value in user_answers.items():
+            if key.startswith('question_'):
+                question_id = key.split('_')[1]
+                reason = user_answers.get(f'reason_{question_id}', '')
+
+                cur.execute("""
+                    UPDATE questions SET (company_number, question_id, answer, reason, latitude, longitude)
+                    VALUES (%s, %s, %s, %s, %s, %s) WHERE id=%s
+                """, (id,question_id, value, reason))
+
+        conn.commit()
+    except Exception as e:
+        print(f"Error storing answers: {e}")
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+
 # def get_all():
 #     """Retrieves all records from the questions table."""
 #     conn = None

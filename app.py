@@ -59,6 +59,9 @@ def logout():
 
 @app.route('/master_add',methods=['GET','POST'])
 def master_add():
+    if is_logged_out():
+        return redirect(url_for('login'))
+    
     administrator=get_all_administrators()
     plant_section=get_all_plant_sections()
     if request.method=='POST':
@@ -81,6 +84,10 @@ def master_add():
 
 @app.route('/master_remove',methods=['GET','POST'])
 def master_remove():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+    
     administrator=get_all_administrators()
     plant_section=get_all_plant_sections()
     if request.method=='POST':
@@ -103,6 +110,10 @@ def master_remove():
 
 @app.route('/master_view',methods=['GET','POST'])
 def master_view():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+    
     administrator=get_all_administrators_on_all_sections()
     plant_section=get_all_plant_sections()
     for items in administrator:
@@ -123,6 +134,9 @@ def master_view():
 @app.route('/admin_create_question',methods=['GET','POST'])
 def admin_create_question():
 
+    if is_logged_out():
+        return redirect(url_for('login'))
+    
     user=session['user']
     plant_sections=[]
     found_admin=get_administrator_with_id(user['id'])
@@ -157,6 +171,9 @@ def admin_create_question():
 @app.route('/admin_delete_question',methods=["GET","POST"])
 def admin_delete_question():
     
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     user=session['user']
     plant_sections=[]
     found_admin=get_administrator_with_id(user['id'])
@@ -202,6 +219,9 @@ def admin_delete_question():
 
 @app.route('/admin_edit_question',methods=['POST','GET'])
 def admin_edit_question():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
     
     user=session['user']
     plant_sections=[]
@@ -243,6 +263,9 @@ def admin_edit_question():
 @app.route('/admin_modify_question',methods=["GET","POST"])
 def admin_modify_question():
 
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     if request.method=="POST":
         
         question = request.form.get("question")
@@ -256,6 +279,10 @@ def admin_modify_question():
 
 @app.route('/admin_create_checklist', methods=['GET', 'POST'])
 def admin_create_checklist():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     operators = get_all_operators()
     user=session['user']
     plant_sections=[]
@@ -329,6 +356,10 @@ def admin_create_checklist():
 
 @app.route('/admin_view_answers', methods=['GET', 'POST'])
 def admin_view_answers():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     plant_sections = get_all_plant_sections()  # Get all plant sections for the dropdown
 
     if request.method == "POST":
@@ -352,10 +383,18 @@ def admin_view_answers():
 
 @app.route('/admin_view_unanswered_questions',methods=['GET','POST'])
 def admin_view_unanswered_questions():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+    
     return render_template("admin_view_unanswered_questions.html")
 
 @app.route('/api/answered_questions', methods=['GET'])
 def get_answered_questions():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     plant_section = request.args.get('plant_section')  # Get plant_section from query parameters
   
     if not plant_section:
@@ -418,8 +457,10 @@ def operator():
                         'answer': answer,
                         'reason': reason,
                     })
-                # if response_data['user_answers']['answer']:
-                print("answers ",response_data)
+                print("users answers are here ",user_answers)
+                # Store the answers in the database
+                # store_answers(user['company_number'], user_answers, user_lat, user_lon)
+
             # Return the result as JSON
             return jsonify(response_data)
 
@@ -432,9 +473,12 @@ def operator():
 
 
 
-
 @app.route("/submit_location", methods=["GET","POST"])
 def submit_location():
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     user=session['user']
     locations=get_all_locations()
     print(locations)
@@ -447,12 +491,16 @@ def submit_location():
         user_id=user['id']
         insert_into_section_location(plant_section.upper(), latitude, longitude, range, user_id)
         
-        flash("successfully safed")
+        flash("location successfully saved")
         return redirect(url_for("submit_location"))
     return render_template("superAdmin_location_update.html",locations=locations)
 
 @app.route('/delete_location/<plant_section>', methods=['GET', 'POST'])
 def delete_location(plant_section):
+
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     user=session['user']
     locations=get_all_locations()
     print(locations)
@@ -461,7 +509,7 @@ def delete_location(plant_section):
     results=delete_from_super_admin(plant_section)
 
     unanswered_questions=delete_all_unanswered_questions(plant_section)
-    
+    flash("location deleted from your repository")
     if results:
         print("location deleted ",results, "deleted unanswered questions ",unanswered_questions)
         return redirect(url_for('delete_location'))
@@ -473,13 +521,16 @@ def delete_location(plant_section):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
+    if is_logged_out():
+        return redirect(url_for('login'))
+
     if request.method=='POST':
         company_number=request.form.get('company_number')
         username=request.form.get('username')
         password=request.form.get('password')
         role=request.form.get('role')
         insert_registerd_user(company_number.upper(), password.strip(), role,username.upper().strip())
-
+        flash("User registered successfully")
     return render_template('superAdmin.html')
 
 from geopy.distance import geodesic
@@ -508,6 +559,11 @@ def is_within_range(user_lat, user_lon, target_lat, target_lon, range_meters):
 @app.route('/getlocation',methods=['POST','GET'])
 def getlocation():
     return render_template("getlocation.html")
+
+def is_logged_out():
+   
+    if not session.get('user'):
+        return True
 
 if __name__ == '__main__':
     app.run(debug=True)

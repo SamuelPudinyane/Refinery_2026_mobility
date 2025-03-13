@@ -444,6 +444,7 @@ def operator():
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])
                 response_data['operators_questions'] = questions
+                response_data['checklist_id']=checklist_id
                 print("questions ",questions)
                 # Map questions and answers
                 for q in questions:
@@ -454,7 +455,7 @@ def operator():
                     reason = user_answers.get(f'reason_{question_id}')
 
                     response_data['user_answers'].append({
-                        'checklist_id':checklist_id,
+                        
                         'question_id': question_id,
                         'question': question_text,
                         'answer': answer,

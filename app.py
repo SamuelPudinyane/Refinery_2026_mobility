@@ -457,7 +457,7 @@ def operator():
                         'answer': answer,
                         'reason': reason,
                     })
-                print("users answers are here ",user_answers)
+                print("users answers are here ",response_data)
                 # Store the answers in the database
                 # store_answers(user['company_number'], user_answers, user_lat, user_lon)
 

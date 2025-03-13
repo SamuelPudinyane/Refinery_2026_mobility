@@ -529,10 +529,7 @@ def delete_location(plant_section):
         flash("Failed to delete location", "error")
 
     # Redirect to the superAdmin_location_update page
-    
-
-        
-    return render_template("superAdmin_location_update.html",locations=locations)
+    return redirect(url_for('submit_location'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

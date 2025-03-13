@@ -344,7 +344,7 @@ def admin_create_checklist():
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if len(operators_questions)>0:
                     insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
-                    flash("Account was created Successfully")
+                    flash("checklist was created Successfully")
                 else:
                     flash("please choose atleast one or more questions")
             # Process the form data (e.g., save to database)
@@ -464,7 +464,11 @@ def operator():
                 response=[response_data['user_answers']]
                 print("response ", response)
                 # Store the answers in the database
-                store_answers(checklist_id,response)
+                output=store_answers(checklist_id,response)
+                if output:
+                    flash("checklist submitted successfully")
+                else:
+                    flash("error occured while submitting checklist")
 
             # Return the result as JSON
             return jsonify(response_data)

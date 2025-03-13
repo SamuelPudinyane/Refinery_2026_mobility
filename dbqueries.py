@@ -1038,9 +1038,9 @@ def get_all_answered_questions_by_plant_section(plant_section):
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE plant_section = %s AND
-              (checklist_answers IS NOT NULL
+              checklist_answers IS NOT NULL
               AND checklist_answers != 'null'
-              AND checklist_answers != '') LIMIT 20
+              AND checklist_answers != '' LIMIT 20
         """)
         
         cur.execute(select_query, (plant_section,))
@@ -1163,36 +1163,37 @@ def delete_all_unanswered_questions(plant_section):
 
 
 
-def store_answers(id,checklist_answers):
+def store_answers(id, checklist_answers):
     """
     Store the user's answers in the database.
     
     Args:
-        company_number (str): The company number of the operator.
-        user_answers (dict): The user's answers.
-        latitude (float): The user's latitude.
-        longitude (float): The user's longitude.
+        id (int): The ID of the question record to update.
+        checklist_answers (str): The user's answers in JSON format.
+    
+    Returns:
+        bool: True if the update was successful, False otherwise.
     """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Insert the answers into the database
-       
+        # Update the checklist_answers column in the database
         cur.execute("""
-                    UPDATE questions SET (checklist_answers)
-                    VALUES (%s) WHERE id=%s
-                """, (id,checklist_answers))
+            UPDATE questions
+            SET checklist_answers = %s
+            WHERE id = %s
+        """, (checklist_answers, id))
 
         conn.commit()
+        return True  # Return True if the update was successful
     except Exception as e:
         print(f"Error storing answers: {e}")
+        return False  # Return False if an error occurs
     finally:
         if conn:
             cur.close()
             conn.close()
-
-
 # def get_all():
 #     """Retrieves all records from the questions table."""
 #     conn = None

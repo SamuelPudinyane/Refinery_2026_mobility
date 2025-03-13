@@ -533,8 +533,6 @@ def delete_location(plant_section):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
-    if is_logged_out():
-        return redirect(url_for('login'))
 
     if request.method=='POST':
         company_number=request.form.get('company_number')

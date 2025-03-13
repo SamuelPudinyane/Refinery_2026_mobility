@@ -1039,8 +1039,8 @@ def get_all_answered_questions_by_plant_section(plant_section):
             FROM public.questions
             WHERE plant_section = %s
               AND checklist_answers IS NOT NULL
-              AND checklist_answers != 'null'
-              AND checklist_answers != ''
+              OR checklist_answers != '[null]'
+              OR checklist_answers != ''
             LIMIT 20
         """)
         
@@ -1089,8 +1089,8 @@ def get_all_answered_questions():
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE checklist_answers IS NOT NULL
-              AND checklist_answers != 'null'
-              AND checklist_answers != ''
+              OR checklist_answers != '[null]'
+              OR checklist_answers != ''
         """)
         
         cur.execute(select_query)
@@ -1249,49 +1249,49 @@ def store_answers(id, checklist_answers):
 
 
 
-def delete_all_data_from_all_tables():
-    """
-    Deletes all data from all tables in the database.
-    """
-      # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
+# def delete_all_data_from_all_tables():
+#     """
+#     Deletes all data from all tables in the database.
+#     """
+#       # Connect to the database
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     try:
       
 
-        # Disable foreign key checks (if needed)
-        cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
+#         # Disable foreign key checks (if needed)
+#         cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
 
-        # Get a list of all tables in the database
-        cursor.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public';
-        """)
-        tables = cursor.fetchall()
+#         # Get a list of all tables in the database
+#         cursor.execute("""
+#             SELECT table_name
+#             FROM information_schema.tables
+#             WHERE table_schema = 'public';
+#         """)
+#         tables = cursor.fetchall()
 
-        # Iterate through each table and delete all data
-        for table in tables:
-            table_name = table[0]
-            print(f"Deleting all data from table: {table_name}")
+#         # Iterate through each table and delete all data
+#         for table in tables:
+#             table_name = table[0]
+#             print(f"Deleting all data from table: {table_name}")
 
-            # Use TRUNCATE for faster deletion (resets auto-increment counters)
-            cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
-                sql.Identifier(table_name)
-            ))
+#             # Use TRUNCATE for faster deletion (resets auto-increment counters)
+#             cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
+#                 sql.Identifier(table_name)
+#             ))
 
-        # Commit the transaction
-        conn.commit()
-        print("All data has been deleted from all tables.")
+#         # Commit the transaction
+#         conn.commit()
+#         print("All data has been deleted from all tables.")
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        # Close the cursor and connection
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#     finally:
+#         # Close the cursor and connection
+#         if cursor:
+#             cursor.close()
+#         if conn:
+#             conn.close()
 
-# Example usage
-delete_all_data_from_all_tables()
+# # Example usage
+# delete_all_data_from_all_tables()

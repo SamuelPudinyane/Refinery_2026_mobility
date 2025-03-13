@@ -396,7 +396,7 @@ def get_answered_questions():
         return redirect(url_for('login'))
 
     plant_section = request.args.get('plant_section')  # Get plant_section from query parameters
-  
+    
     if not plant_section:
         return jsonify({"error": "plant_section parameter is required"}), 400
 
@@ -461,10 +461,10 @@ def operator():
                         'reason': reason,
                     })
                 print("users answers are here ",response_data)
-                response=[response_data]
+                response=[response_data['user_answers']]
                 print("response ", response)
                 # Store the answers in the database
-                # store_answers(checklist_id,response_data)
+                # store_answers(checklist_id,response)
 
             # Return the result as JSON
             return jsonify(response_data)

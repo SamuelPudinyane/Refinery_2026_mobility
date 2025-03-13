@@ -507,25 +507,29 @@ def submit_location():
         return redirect(url_for("submit_location"))
     return render_template("superAdmin_location_update.html",locations=locations)
 
+
 @app.route('/delete_location/<plant_section>', methods=['GET', 'POST'])
 def delete_location(plant_section):
-
     if is_logged_out():
         return redirect(url_for('login'))
 
-    user=session['user']
-    locations=get_all_locations()
+    user = session['user']
+    locations = get_all_locations()
     print(locations)
-    plant_section= plant_section
-    print("plant section ",plant_section)
-    results=delete_from_super_admin(plant_section)
+    print("Plant section:", plant_section)
 
-    unanswered_questions=delete_all_unanswered_questions(plant_section)
-    flash("location deleted from your repository")
+    # Delete the location and unanswered questions
+    results = delete_from_super_admin(plant_section)
+    unanswered_questions = delete_all_unanswered_questions(plant_section)
+
     if results:
-        print("location deleted ",results, "deleted unanswered questions ",unanswered_questions)
-        return redirect(url_for('delete_location'))
-        
+        print("Location deleted:", results, "Deleted unanswered questions:", unanswered_questions)
+        flash("Location deleted from your repository", "success")
+    else:
+        flash("Failed to delete location", "error")
+
+    # Redirect to the superAdmin_location_update page
+    
 
         
     return render_template("superAdmin_location_update.html",locations=locations)

@@ -5,7 +5,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
                         get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
-                        get_all_answered_questions,delete_all_unanswered_questions
+                        get_all_answered_questions,delete_all_unanswered_questions,store_answers
                        )
 from datetime import datetime
 import json
@@ -444,7 +444,6 @@ def operator():
             if is_within:
                 questions = json.loads(questions[0]['checklist_questions'])
                 response_data['operators_questions'] = questions
-                response_data['checklist_id']=checklist_id
                 print("questions ",questions)
                 # Map questions and answers
                 for q in questions:
@@ -462,8 +461,10 @@ def operator():
                         'reason': reason,
                     })
                 print("users answers are here ",response_data)
+                response=[response_data]
+                print("response ", response)
                 # Store the answers in the database
-                # store_answers(user['company_number'], user_answers, user_lat, user_lon)
+                # store_answers(checklist_id,response_data)
 
             # Return the result as JSON
             return jsonify(response_data)

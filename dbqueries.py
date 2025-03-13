@@ -1163,7 +1163,7 @@ def delete_all_unanswered_questions(plant_section):
 
 
 
-def store_answers(id,user_answers):
+def store_answers(id,checklist_answers):
     """
     Store the user's answers in the database.
     
@@ -1178,15 +1178,11 @@ def store_answers(id,user_answers):
         cur = conn.cursor()
 
         # Insert the answers into the database
-        for key, value in user_answers.items():
-            if key.startswith('question_'):
-                question_id = key.split('_')[1]
-                reason = user_answers.get(f'reason_{question_id}', '')
-
-                cur.execute("""
-                    UPDATE questions SET (company_number, question_id, answer, reason, latitude, longitude)
-                    VALUES (%s, %s, %s, %s, %s, %s) WHERE id=%s
-                """, (id,question_id, value, reason))
+       
+        cur.execute("""
+                    UPDATE questions SET (checklist_answers)
+                    VALUES (%s) WHERE id=%s
+                """, (id,checklist_answers))
 
         conn.commit()
     except Exception as e:

@@ -367,15 +367,17 @@ def admin_view_answers():
         if selected_section:
             # Filter answers based on the selected section
             answers = get_all_answered_questions_by_plant_section(selected_section)
+            print("if ",answers)
         else:
             # If no section is selected, return all answers
             answers = get_all_answered_questions()
-        
+            print("else ",answers)
         # Return the filtered answers and plant sections to the template
         return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
 
     # For GET requests, return all answers
     answers = get_all_answered_questions()
+    print("default ",answers)
     return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
 
 

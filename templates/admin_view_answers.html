@@ -62,10 +62,10 @@
                         <h4>Questions and Answers:</h4>
                         <div>
                             <p><strong>Question:</strong> {{ answer.checklist_answers }}</p>
-                            {% for reply in answer%}
+                            {% for reply in answer.checklist_answers %}
                             <p><strong>Question:</strong> {{ reply.question }}</p>
                             <p><strong>Answer:</strong> {{ reply.answer }}</p>
-                            {% if reply.reason | length>0 %}
+                            {% if reply.reason is not null %}
                             <p><strong>Answer:</strong> {{ reply.reason }}</p>
                             {% endif %}
                             {% endfor %}

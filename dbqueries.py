@@ -1114,7 +1114,11 @@ def get_all_answered_questions():
 
 def delete_all_unanswered_questions(plant_section):
     """
-    Deletes all records from the questions table where checklist_answers is NULL, 'null', or an empty string.
+    Deletes all records from the questions table for a specific plant section
+    where checklist_answers is NULL, 'null', or an empty string.
+    
+    Args:
+        plant_section (str): The plant section to filter the questions by.
     
     Returns:
         int: The number of rows deleted, or None if an error occurs.
@@ -1131,15 +1135,16 @@ def delete_all_unanswered_questions(plant_section):
         cur = conn.cursor()
 
         # Delete query to remove records with unanswered questions
-        delete_query ="""
+        delete_query = sql.SQL("""
             DELETE FROM public.questions
-            WHERE plant_section=%s AND (checklist_answers IS NULL 
-               OR checklist_answers = 'null' 
-               OR checklist_answers = '');
-        """
+            WHERE plant_section = %s
+              AND (checklist_answers IS NULL 
+                  OR checklist_answers = 'null' 
+                  OR checklist_answers = '');
+        """)
         
         # Execute the delete query
-        cur.execute(delete_query,(plant_section,))
+        cur.execute(delete_query, (plant_section,))
         
         # Get the number of rows deleted
         rows_deleted = cur.rowcount
@@ -1244,49 +1249,49 @@ def store_answers(id, checklist_answers):
 
 
 
-# def delete_all_data_from_all_tables():
-#     """
-#     Deletes all data from all tables in the database.
-#     """
-#       # Connect to the database
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     try:
+def delete_all_data_from_all_tables():
+    """
+    Deletes all data from all tables in the database.
+    """
+      # Connect to the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
       
 
-#         # Disable foreign key checks (if needed)
-#         cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
+        # Disable foreign key checks (if needed)
+        cursor.execute("SET CONSTRAINTS ALL DEFERRED;")
 
-#         # Get a list of all tables in the database
-#         cursor.execute("""
-#             SELECT table_name
-#             FROM information_schema.tables
-#             WHERE table_schema = 'public';
-#         """)
-#         tables = cursor.fetchall()
+        # Get a list of all tables in the database
+        cursor.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public';
+        """)
+        tables = cursor.fetchall()
 
-#         # Iterate through each table and delete all data
-#         for table in tables:
-#             table_name = table[0]
-#             print(f"Deleting all data from table: {table_name}")
+        # Iterate through each table and delete all data
+        for table in tables:
+            table_name = table[0]
+            print(f"Deleting all data from table: {table_name}")
 
-#             # Use TRUNCATE for faster deletion (resets auto-increment counters)
-#             cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
-#                 sql.Identifier(table_name)
-#             ))
+            # Use TRUNCATE for faster deletion (resets auto-increment counters)
+            cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
+                sql.Identifier(table_name)
+            ))
 
-#         # Commit the transaction
-#         conn.commit()
-#         print("All data has been deleted from all tables.")
+        # Commit the transaction
+        conn.commit()
+        print("All data has been deleted from all tables.")
 
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#     finally:
-#         # Close the cursor and connection
-#         if cursor:
-#             cursor.close()
-#         if conn:
-#             conn.close()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Close the cursor and connection
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
-# # Example usage
-# delete_all_data_from_all_tables()
+# Example usage
+delete_all_data_from_all_tables()

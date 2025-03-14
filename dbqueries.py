@@ -1185,7 +1185,7 @@ def store_answers(id, checklist_answers):
         # Convert the list of dictionaries to a JSON string
         checklist_answers = json.dumps(checklist_answers)
 
-
+        print("checklist_answers db",checklist_answers)
         # Update the checklist_answers column in the database
         cur.execute("""
             UPDATE questions

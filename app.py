@@ -381,8 +381,8 @@ def admin_view_answers():
     checklist_answers=[]
     for item in answers:
         print("debug item",item['checklist_answers'])
-        for ans in item['checklist_answers']:
-            checklist_answers.append(ans)
+        ans=json.dumps(item['checklist_answers'])
+        checklist_answers.append(ans[0])
     print("final ",checklist_answers)
     return render_template("admin_view_answers.html",checklist_answers=checklist_answers ,answers=answers, plant_sections=plant_sections)
 

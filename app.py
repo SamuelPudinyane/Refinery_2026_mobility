@@ -382,7 +382,7 @@ def admin_view_answers():
     for item in answers:
         print("debug item",item['checklist_answers'])
         ans=json.dumps(item['checklist_answers'])
-        checklist_answers.append(ans[0])
+        checklist_answers.append(ans)
     print("final ",checklist_answers)
     return render_template("admin_view_answers.html",checklist_answers=checklist_answers ,answers=answers, plant_sections=plant_sections)
 

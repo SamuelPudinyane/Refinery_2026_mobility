@@ -384,7 +384,7 @@ def admin_view_answers():
         for ans in item['checklist_answers']:
             checklist_answers.append(ans)
     print("final ",checklist_answers)
-    return render_template("admin_view_answers.html",checklist_answers=checklist_answers answers=answers, plant_sections=plant_sections)
+    return render_template("admin_view_answers.html",checklist_answers=checklist_answers ,answers=answers, plant_sections=plant_sections)
 
 
 

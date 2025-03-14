@@ -61,8 +61,8 @@
                     <div class="card-body">
                         <h4>Questions and Answers:</h4>
                         <div>
-                            <p><strong>Question:</strong> {{ answer.checklist_answers }}</p>
-                            {% for reply in answer.checklist_answers %}
+                            <p><strong>Question:</strong> {{ checklist_answers }}</p>
+                            {% for reply in checklist_answers %}
                             <p><strong>Question:</strong> {{ reply.question }}</p>
                             <p><strong>Answer:</strong> {{ reply.answer }}</p>
                             {% if reply.reason %}

@@ -378,9 +378,13 @@ def admin_view_answers():
     # For GET requests, return all answers
     answers = get_all_answered_questions()
     print("default ",answers)
+    checklist_answers=[]
     for item in answers:
         print("debug item",item['checklist_answers'])
-    return render_template("admin_view_answers.html", answers=answers, plant_sections=plant_sections)
+        for ans in item['checklist_answers']:
+            checklist_answers.append(ans)
+    print("final ",checklist_answers)
+    return render_template("admin_view_answers.html",checklist_answers=checklist_answers answers=answers, plant_sections=plant_sections)
 
 
 

@@ -470,6 +470,7 @@ def operator():
                 print("response ", response)
                 # Store the answers in the database
                 output=store_answers(checklist_id,response)
+                print(output)
                 if output:
                     flash("checklist submitted successfully")
                 else:

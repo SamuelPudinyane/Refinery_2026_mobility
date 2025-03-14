@@ -1183,7 +1183,7 @@ def store_answers(id, checklist_answers):
         cur = conn.cursor()
 
         # Convert the list of dictionaries to a JSON string
-        checklist_answers_json = json.dumps(checklist_answers)
+        checklist_answers = json.dumps(checklist_answers)
 
 
         # Update the checklist_answers column in the database
@@ -1191,7 +1191,7 @@ def store_answers(id, checklist_answers):
             UPDATE questions
             SET checklist_answers = %s
             WHERE id = %s
-        """, (checklist_answers_json, id))
+        """, (checklist_answers, id))
 
         conn.commit()
         return True  # Return True if the update was successful

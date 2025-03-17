@@ -198,6 +198,7 @@ def admin_delete_question():
             filtered_section = get_all_questions_on_particular_sections(selected_section)
       
             print("filter ",filtered_section)
+            questions=filtered_section                      
             # Return filtered questions as JSON
             return jsonify({
                 "message": "Section received",
@@ -214,7 +215,7 @@ def admin_delete_question():
                         delete_selected_questions(id)
                         flash("Question successfully deleted", "success")
                         return redirect(url_for('admin_delete_question'))
-    return render_template('admin_delete_questions.html',questions=questions,filtered_section=filtered_section,plant_sections=plant_sections)
+    return render_template('admin_delete_questions.html',questions=questions,plant_sections=plant_sections)
 
 
 @app.route('/admin_edit_question',methods=['POST','GET'])
@@ -246,6 +247,7 @@ def admin_edit_question():
             filtered_section = get_all_questions_on_particular_sections(selected_section)
       
             print("filter ",filtered_section)
+            questions=filtered_section
             # Return filtered questions as JSON
             return jsonify({
                 "message": "Section received",
@@ -256,9 +258,9 @@ def admin_edit_question():
 
             question_id = request.form.get("question_id")
             question=get_one_question(question_id)
-            return render_template('admin_modify_question.html',question=question,filtered_section=filtered_section,plant_sections=plant_sections)
+            return render_template('admin_modify_question.html',question=question,plant_sections=plant_sections)
     
-    return render_template('admin_edit_question.html',questions=questions,filtered_section=filtered_section,plant_sections=plant_sections)
+    return render_template('admin_edit_question.html',questions=questions,plant_sections=plant_sections)
 
 @app.route('/admin_modify_question',methods=["GET","POST"])
 def admin_modify_question():

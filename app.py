@@ -197,7 +197,7 @@ def admin_delete_question():
             # Filter questions based on the selected section
             filtered_section = get_all_questions_on_particular_sections(selected_section)
       
-            
+            print("filter ",filtered_section)
             # Return filtered questions as JSON
             return jsonify({
                 "message": "Section received",
@@ -245,7 +245,7 @@ def admin_edit_question():
             # Filter questions based on the selected section
             filtered_section = get_all_questions_on_particular_sections(selected_section)
       
-            
+            print("filter ",filtered_section)
             # Return filtered questions as JSON
             return jsonify({
                 "message": "Section received",

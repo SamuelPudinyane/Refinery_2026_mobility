@@ -62,8 +62,8 @@
                       <div class="container card card_add_admin">
                           <fieldset>
                               <ul>
-                                  {% if questions %}
-                                      {% for question in questions %}
+                                  {% if filtered_section %}
+                                      {% for question in filtered_section %}
                                           <li>
                                               <label>
                                                   <input type="radio" name="question_id" value="{{ question.id }}" />

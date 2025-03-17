@@ -61,8 +61,8 @@
                   <div class="card myBlock">
                       <div class="container card_add_admin">
                           <ul>
-                              {% if questions %}
-                                  {% for question in questions %}
+                              {% if filtered_section %}
+                                  {% for question in filtered_section %}
                                       <li>
                                           <label>
                                               <input type="checkbox" name="question_ids[]" value="{{ question.id }}" />

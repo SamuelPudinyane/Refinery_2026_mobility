@@ -5,7 +5,8 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        update_selected_questions,get_all_questions_on_particular_sections,get_all_questions_selected_questions,get_administrator_with_id_and_section,
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
                         get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
-                        get_all_answered_questions,delete_all_unanswered_questions,store_answers
+                        get_all_answered_questions,delete_all_unanswered_questions,store_answers,get_count_of_question,delete_checklist_questions,
+
                        )
 from datetime import datetime
 import json
@@ -257,6 +258,7 @@ def admin_edit_question():
         else:
 
             question_id = request.form.get("question_id")
+            print("this id ",question_id)
             question=get_one_question(question_id)
             return render_template('admin_modify_question.html',question=question,plant_sections=plant_sections)
     
@@ -284,11 +286,13 @@ def admin_create_checklist():
 
     if is_logged_out():
         return redirect(url_for('login'))
+    
 
     operators = get_all_operators()
     user=session['user']
     plant_sections=[]
     found_admin=get_administrator_with_id(user["id"])
+    count=get_count_of_question()
     print(found_admin)
     if not found_admin:
         flash("you are currently not assigned to any plant section")
@@ -322,7 +326,7 @@ def admin_create_checklist():
             section = request.form.get("section")
             print("section ",section.lower())
             select = request.form.get("select")
-            location=get_all_locations_by_plant_section(section)
+            location=get_all_locations_by_plant_section(section.lower())
             print("location ",location)
             Checked_questions=request.form.getlist("question_id[]")
             operators_questions=[]
@@ -345,16 +349,32 @@ def admin_create_checklist():
                 print(latitute_longitude)
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 if len(operators_questions)>0:
-                    insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
-                    flash("checklist was created Successfully")
+                   
+                    print("count ", count)
+                    
+                    if len(count)<2:
+                        insert_question(operators_questions, latitute_longitude,section, operator[0]['company_number'], operator[0]['name'], timestamp,checklist_answers=None, operators_location=None )
+                        flash("checklist was created Successfully")
+                    else:
+                        flash("you cannot create more checklist, please upgrade your subscription")
                 else:
                     flash("please choose atleast one or more questions")
             # Process the form data (e.g., save to database)
             return redirect(url_for("admin_create_checklist")) #render_template("tion.html",operators_questions=operators_questions)
-
+    
+    if count:
+        for item in count:
+            print("item ",type(json.loads(item['checklist_questions'])))
+            item['checklist_questions']=json.loads(item['checklist_questions'])
+    print("counting",count)
     # Render the template for GET requests
-    return render_template('admin_create_checklist.html', operators=operators, questions=questions,plant_sections=plant_sections)
+    return render_template('admin_create_checklist.html',count=count, operators=operators, questions=questions,plant_sections=plant_sections)
 
+@app.route("/delete_checklist/<id>",methods=["GET","POST"])
+def delete_checklist(id):
+    delete_checklist_questions(id)
+    flash("checklist deleted succeesfully")
+    return redirect(url_for("admin_create_checklist"))
 
 @app.route('/admin_view_answers', methods=['GET', 'POST'])
 def admin_view_answers():
@@ -417,23 +437,24 @@ def get_answered_questions():
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
     user = session.get('user')  # Get the user from the session
-    something=get_all_answered_questions()
-    print("something ",something)
+    something = get_all_answered_questions()
+    print("something ", something)
     if request.method == 'POST':
         # Get the user's location and answers from the request
         user_data = request.json
         user_lat = user_data.get('latitude')
         user_lon = user_data.get('longitude')
-        user_answers = user_data.get('answers', {})  # Get user answers
-
+        user_answers = user_data.get('answers_with_questions', {})  # Get user answers
+        print("user ans ",user_answers)
         # Store the user's location in the session
         session['user_lat'] = user_lat
         session['user_lon'] = user_lon
 
         # Get the target location and range
-        questions = get_all_questions_by_company_number(user['company_number'])
-        if questions:
-            location = json.loads(questions[0]['location'])
+        questions_data = get_all_questions_by_company_number(user['company_number'])
+        print("data ",questions_data)
+        if questions_data:
+            location = json.loads(questions_data[0]['location'])
             target_location = location[0]
 
             # Check if the user is within range
@@ -449,38 +470,23 @@ def operator():
                 'is_within_range': is_within,
                 'user_answers': [],  # Initialize an empty list for mapped answers
             }
-            checklist_id=questions[0]['id']
-            print("cklst",questions," my_id ",checklist_id)
+            checklist_id = questions_data[0]['id']
+            print("cklst", questions_data, " my_id ", checklist_id)
+
             # Include operators_questions in the response if within range
             if is_within:
-                questions = json.loads(questions[0]['checklist_questions'])
-                response_data['operators_questions'] = questions
-                print("questions ",questions)
-                # Map questions and answers
-                for q in questions:
-                    
-                    question_id = q['id']
-                    question_text = q['question']
-                    answer = user_answers.get(f'question_{question_id}')
-                    reason = user_answers.get(f'reason_{question_id}')
 
-                    response_data['user_answers'].append({
-                        
-                        'question_id': question_id,
-                        'question': question_text,
-                        'answer': answer,
-                        'reason': reason,
-                    })
-                print("users answers are here ",response_data)
-                response=response_data['user_answers']
-                print("response ", response)
                 # Store the answers in the database
-                output=store_answers(checklist_id,response)
-                print(output)
-                if output:
-                    flash("checklist submitted successfully")
+                if user_answers:
+                    output = store_answers(checklist_id, user_answers)
+                    print("user_answers --",output)
+                    if output:
+                        flash("Checklist submitted successfully")
+                        return redirect(url_for('operator'))
+                    else:
+                        flash("Error occurred while submitting checklist")
                 else:
-                    flash("error occured while submitting checklist")
+                    flash("No answers provided.")
 
             # Return the result as JSON
             return jsonify(response_data)
@@ -491,6 +497,7 @@ def operator():
         questions = json.loads(questions[0]['checklist_questions'])
 
     return render_template('operator.html', operators_questions=questions)
+
 
 
 

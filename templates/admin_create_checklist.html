@@ -106,6 +106,38 @@
             <i class="fas fa-paper-plane me-2"></i>Send Checklist
         </button>
     </form>
+
+    <hr>
+     <!-- Table to Display Locations -->
+     <table class="table table-bordered table-striped mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Checklist count</th>
+                <th>Checklist questions</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if count %}
+            {% for item in count %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                
+                <td>{% for questions in item.checklist_questions %}
+                    
+                    <p><span>Question </span>{{questions.question}}</p>
+                    <p><spand>Question_type </spand>{{questions.question_type}}</p>
+
+                {% endfor %}
+                </td>
+                <td><a href="{{ url_for('delete_checklist', id=item.id) }}" class="btn btn-dark btn-sm my-1">
+                    <i class="fas fa-user-minus me-2"></i>DELETE
+                </a></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
     </div>
     <script>
       // Flash message fade-out

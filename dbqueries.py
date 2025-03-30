@@ -20,37 +20,37 @@ import os
 
 """
 
-# def get_db_connection():
-#     try:
-#         # Use environment variables for connection parameters
-#         conn = psycopg2.connect(
-#             dbname="rand_refinary", 
-#             user="postgres",  
-#             password="Admin",  
-#             host="localhost", 
-#             port=5432 
-#         )
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to PostgreSQL database: {e}")
-#         return None
-
-
-
 def get_db_connection():
     try:
         # Use environment variables for connection parameters
         conn = psycopg2.connect(
-            dbname="mobility_app", 
-            user="mobility_app_user",  
-            password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
-            host="dpg-cv79pjjtq21c73anf3ug-a", 
+            dbname="rand_refinary", 
+            user="postgres",  
+            password="Admin",  
+            host="localhost", 
             port=5432 
         )
         return conn
     except Exception as e:
         print(f"Error connecting to PostgreSQL database: {e}")
         return None
+
+
+
+# def get_db_connection():
+#     try:
+#         # Use environment variables for connection parameters
+#         conn = psycopg2.connect(
+#             dbname="mobility_app", 
+#             user="mobility_app_user",  
+#             password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
+#             host="dpg-cv79pjjtq21c73anf3ug-a", 
+#             port=5432 
+#         )
+#         return conn
+#     except Exception as e:
+#         print(f"Error connecting to PostgreSQL database: {e}")
+#         return None
 
 
 # Database connection function
@@ -256,6 +256,75 @@ def get_all_plantsection_and_question(plant_section,question):
 
 
 
+def get_count_of_question():
+    """Fetch the total number of questions and details for each record."""
+    try:
+        # Establish database connection
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                # Query to fetch total count and question details
+                query = """
+                SELECT 
+                    COUNT(*) OVER() AS total_count,  -- Window function for total count
+                    id, 
+                    plant_section, 
+                    checklist_questions,
+                    location
+                FROM questions;
+                """
+                cursor.execute(query)
+
+                # Fetch all rows
+                rows = cursor.fetchall()
+
+                # Convert query result into a list of dictionaries
+                questions = [
+                    {
+                        "total_count": row[0],
+                        "id": row[1],
+                        "plant_section": row[2],
+                        "checklist_questions": row[3]
+                    } 
+                    for row in rows
+                ]
+
+                return questions  # Return the list of dictionaries
+
+    except Exception as e:
+        print(f"Error fetching questions: {e}")
+        return []  # Return empty list if an error occurs
+
+
+
+def delete_checklist_questions(id):
+    """Deletes an checklist_questions from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Delete Query
+        query = "DELETE FROM questions WHERE id=%s "
+        cur.execute(query, (id,))  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
+
+
+
 
 def get_administrator_with_id_and_section(admin_id,section):
     """Fetch administrators with id."""
@@ -445,7 +514,7 @@ def get_one_question(id):
     row = cursor.fetchone()
 
     conn.close()
- 
+    print("row ",row)
     # Convert query result into a list of dictionaries
     questions = [{"id": row[0],"plant_section":row[1], "question": row[2],"question_type":row[3],"options":row[4],"reasoning":row[5]}]
    
@@ -672,39 +741,40 @@ def get_all_plant_sections():
 
 
 def get_all_locations_by_plant_section(plant_section):
-    """Fetch all plant_section_locations for a given plant_section."""
+    """Fetch all plant_section_locations for a given plant_section.
+    
+    Args:
+        plant_section (str): The plant section to query locations for
+        
+    Returns:
+        list: A list of dictionaries containing location data, or empty list if none found
+    """
     try:
-        # Ensure proper resource management
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 query = """
                 SELECT id, plant_section, latitude, longitude, range, user_id
                 FROM plant_section_locations
-                WHERE plant_section = %s ORDER BY id DESC LIMIT 1
+                WHERE plant_section = %s
+                ORDER BY id DESC
                 """
-                cursor.execute(query, (plant_section,))  # Fixed parameter passing
-
-                # Fetch all rows
-                rows = cursor.fetchall()  # Use fetchall() instead of fetchone()
-
-                # Convert query result into a list of dictionaries
-                data = [
-                    {
-                        "id": row[0],
-                        "plant_section": row[1],
-                        "latitude": row[2],
-                        "longitude": row[3],
-                        "range": row[4],
-                        "user_id": row[5],
-                    }
-                    for row in rows
-                ]
-
-                return data  # Return the list
+                cursor.execute(query, (plant_section,))
+                
+                # Use named cursor description for more robust column access
+                columns = [desc[0] for desc in cursor.description]
+                locations = []
+                print("database plant location ",locations)
+                for row in cursor:
+                    location = dict(zip(columns, row))
+                    locations.append(location)
+                
+                return locations
 
     except Exception as e:
-        print("Error fetching locations:", e)
-        return []  # Return empty list if an error occurs
+        print(f"Error fetching locations for {plant_section}: {e}")
+        return []
+    
+
 
 def insert_question(checklist_questions, location, plant_section, company_number, operator, time_stamp,checklist_answers=None, operators_location=None ):
     """Inserts a new question entry into the PostgreSQL database"""

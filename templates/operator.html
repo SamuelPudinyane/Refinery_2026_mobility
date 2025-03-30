@@ -3,233 +3,179 @@
 {% block title %}Checklist Form{% endblock %}
 
 {% block content %}
-    <h2 class="text-center">OPERATOR</h2>
-    <div class="p-4">
-        <!-- Status message -->
-        <div id="status">
-            <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
-        </div>
-
-        <!-- Questions (initially hidden) -->
-        <div id="questions" style="display: none;">
-            <form class="form-control" id="checklist-form">
-                <!-- Plant Section Label with Icon -->
-                {% if operators_questions | length > 0 %}
-                    <label class="form-label">
-                        <i class="fas fa-industry me-2"></i>{{ operators_questions[0].plant_section | upper }}
-                    </label>
-                {% endif %}
-        
-                <div class="card myBlock">
-                    <div class="container card card_add_admin">
-                        <!-- Checklist Heading with Icon -->
-                        <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
-                        {% if operators_questions | length > 0 %}
-                            {% for q in operators_questions %}
-                                <div class="mb-3">
-                                    <!-- Question Label with Icon -->
-                                    <label class="form-label">
-                                        {{ loop.index }}. {{ q.question }}
-                                    </label>
-                                    
-                                    {% if q.question_type == "text" %}
-                                        <!-- Text Input with Icon -->
-                                        <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="fas fa-pencil-alt"></i>
-                                            </span>
-                                            <input type="text" class="form-control" name="question_{{ q.id }}" required>
-                                        </div>
-                                    
-                                    {% elif q.question_type == "radio" %}
-                                        {% for option in q.options[0] %}
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="question_{{ q.id }}" 
-                                                       value="{{ option }}" 
-                                                       id="radio_{{ q.id }}_{{ option }}"
-                                                       data-reasoning="{{ q.reasoning }}"
-                                                       onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
-                                                       required>
-                                                <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
-                                                   {{ option }}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
-            
-                                        {% if q.reasoning %}
-                                            <!-- Reasoning Input with Icon -->
-                                            <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
-                                                <label class="form-label">
-                                                    <i class="fas fa-comment-dots me-2"></i>Provide a reason:
-                                                </label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <i class="fas fa-pencil-alt"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control" name="reason_{{ q.id }}">
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p>No questions available.</p>
-                        {% endif %}
-                    </div>
-        
-                    <!-- Submit Button with Icon -->
-                    <button type="submit" class="btn btn-success btn-add-admin">
-                        <i class="fas fa-check-circle me-2"></i>Submit
-                    </button>
-                </div>
-            </form>
-        </div>
+<h2 class="text-center">OPERATOR</h2>
+<div class="p-4">
+    <div id="status">
+        <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
     </div>
 
-    <script>
-        let watchId;
+    <div id="questions" style="display: none;">
+        <form class="form-control" id="checklist-form">
+            {% if operators_questions | length > 0 %}
+                <label class="form-label">
+                    <i class="fas fa-industry me-2"></i>{{ operators_questions[0].plant_section | upper }}
+                </label>
+            {% endif %}
 
-        // Function to handle location updates
-        function displayLocation(position) {
-            const userLat = position.coords.latitude;
-            const userLon = position.coords.longitude;
+            <div class="card myBlock">
+                <div class="container card card_add_admin">
+                    <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
+                    {% if operators_questions | length > 0 %}
+                        {% for q in operators_questions %}
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    {{ loop.index }}. {{ q.question }}
+                                </label>
 
-            // Store the location in sessionStorage
-            sessionStorage.setItem('user_lat', userLat);
-            sessionStorage.setItem('user_lon', userLon);
+                                {% if q.question_type == "text" %}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                        <input type="text" class="form-control" 
+                                               name="answers[{{ q.id }}]" required>
+                                    </div>
 
-            // Send the location to the server
-            fetch('/operator', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    latitude: userLat,
-                    longitude: userLon,
-                }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    // Handle the response (e.g., update the page)
-                    console.log(data);
-                    updatePage(data); // Update the page dynamically
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+                                {% elif q.question_type == "radio" %}
+                                    {% for option in q.options[0] %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="radio" 
+                                                   name="answers[{{ q.id }}]" 
+                                                   value="{{ option }}" 
+                                                   id="radio_{{ q.id }}_{{ option }}" 
+                                                   data-reasoning="{{ q.reasoning }}"
+                                                   onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')" 
+                                                   required>
+                                            <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
+                                                {{ option }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+
+                                    {% if q.reasoning %}
+                                        <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
+                                            <label class="form-label">
+                                                <i class="fas fa-comment-dots me-2"></i>Provide a reason:
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                                <input type="text" class="form-control" 
+                                                       name="reasons[{{ q.id }}]">
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No questions available.</p>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-success btn-add-admin">
+                    <i class="fas fa-check-circle me-2"></i>Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let watchId;
+
+// Function to get user location once
+function getUserLocation(callback) {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                sessionStorage.setItem('user_lat', userLat);
+                sessionStorage.setItem('user_lon', userLon);
+                callback();
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                alert('Failed to get your location. Please try again.');
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    } else {
+        alert('Geolocation is not supported by this browser.');
+    }
+}
+
+// Function to toggle reason input visibility
+function toggleReasonInput(questionId, selectedOption) {
+    const reasonDiv = document.getElementById(`reason_${questionId}`);
+    const selectedRadio = document.querySelector(`input[name="answers[${questionId}]"]:checked`);
+    if (!selectedRadio) return;
+
+    const reasoning = selectedRadio.dataset.reasoning;
+    if ((reasoning === "yes" && selectedOption === "YES") || 
+        (reasoning === "no" && selectedOption === "NO")) {
+        reasonDiv.style.display = "block";
+    } else {
+        reasonDiv.style.display = "none";
+    }
+}
+
+// Form submission with geolocation
+document.getElementById('checklist-form').addEventListener('submit', function (event) {
+    event.preventDefault(); 
+
+    getUserLocation(() => {
+        const formData = new FormData(this);
+        const answersWithQuestions = [];
+
+        // Loop through form data to collect answers and reasoning
+        for (const [key, value] of formData.entries()) {
+            if (key.startsWith("answers[")) {
+                const id = key.match(/\d+/)[0]; // Extract question ID
+                const questionElement = document.querySelector(`input[name="${key}"]`).closest('.mb-3').querySelector('label');
+                const questionLabel = questionElement ? questionElement.textContent.trim().replace(/^\d+\.\s*/, '') : "Unknown question";const answer = value;
+                const reason = formData.get(`reasons[${id}]`) || null; // Get the reason, if available
+
+                // Add question, answer, and reason to the array
+                answersWithQuestions.push({
+                    question: questionLabel.trim(),
+                    answer: answer,
+                    reason: reason ? reason.trim() : null
                 });
-        }
-
-        // Function to handle errors
-        function handleError(error) {
-            console.error('Error getting location:', error);
-        }
-
-        // Start watching the user's location
-        function startWatchingLocation() {
-            if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition(
-                    displayLocation,
-                    handleError,
-                    {
-                        enableHighAccuracy: true, // Use high accuracy mode
-                        timeout: 5000, // Maximum time to wait for a location (in milliseconds)
-                        maximumAge: 0, // Do not use a cached position
-                    }
-                );
-            } else {
-                console.error('Geolocation is not supported by this browser.');
+                console.log("ans ",answersWithQuestions)
             }
         }
 
-        // Stop watching the user's location
-        function stopWatchingLocation() {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-        }
-
-        // Function to update the page dynamically
-        function updatePage(data) {
-            const statusDiv = document.getElementById('status');
-            const questionsDiv = document.getElementById('questions');
-
-            if (data.is_within_range) {
-                // Display the questions if within range
-                statusDiv.innerHTML = 'You are within range!';
-                questionsDiv.style.display = 'block'; // Show the questions
-            } else {
-                // Display a message if outside the range
-                statusDiv.innerHTML = 'You are outside the range.';
-                questionsDiv.style.display = 'none'; // Hide the questions
-            }
-        }
-
-        // Function to toggle reason input visibility
-        function toggleReasonInput(questionId, selectedOption) {
-            const reasonDiv = document.getElementById(`reason_${questionId}`);
-            const selectedRadio = document.querySelector(`input[name="question_${questionId}"]:checked`);
-
-            if (!selectedRadio) return; // No selection, do nothing
-
-            const reasoning = selectedRadio.dataset.reasoning; // Get reasoning value
-
-            // Check if we need to show the reason input
-            if ((reasoning === "yes" && selectedOption === "YES") || 
-                (reasoning === "no" && selectedOption === "NO")) {
-                reasonDiv.style.display = "block";
-            } else {
-                reasonDiv.style.display = "none";
-            }
-        }
-
-        // Function to handle form submission
-        document.getElementById('checklist-form').addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            // Collect form data
-            const formData = new FormData(this);
-            const answers = {};
-
-            // Loop through form data and structure it
-            for (const [key, value] of formData.entries()) {
-                answers[key] = value;
-            }
-
-            // Stop watching the location
-            stopWatchingLocation();
-
-            // Send the answers to the server
-            fetch('/operator', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    latitude: sessionStorage.getItem('user_lat'), // Get stored latitude
-                    longitude: sessionStorage.getItem('user_lon'), // Get stored longitude
-                    answers: answers, // Include user answers
-                }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log('Server Response:', data);
-                    // Handle the response (e.g., display a success message)
-                    alert('Checklist submitted successfully!');
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    //alert('Failed to submit checklist.');
-                });
+        const userLat = sessionStorage.getItem('user_lat');
+        const userLon = sessionStorage.getItem('user_lon');
+        
+        // Final submission to server
+        fetch('/operator', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                latitude: userLat,
+                longitude: userLon,
+                answers_with_questions: answersWithQuestions, // Send answers with corresponding questions
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            alert('Checklist submitted successfully!');
+            console.log('Server Response:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to submit checklist.');
         });
+    });
+});
 
-        // Start watching when the page loads
-        window.onload = startWatchingLocation;
+// Show questions once geolocation is successful
+window.onload = function() {
+    getUserLocation(() => {
+        document.getElementById('status').innerHTML = 'You are within range!';
+        document.getElementById('questions').style.display = 'block';
+    });
+};
 
-        // Stop watching when the page is unloaded
-        window.onbeforeunload = stopWatchingLocation;
-    </script>
+</script>
 {% endblock %}

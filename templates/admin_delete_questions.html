@@ -3,18 +3,25 @@
 {% block title %}ADMINISTRATORS{% endblock %}
 {% block sidebar%}
 <div class="container-fluid add-admin">
-  <a href="{{ url_for('admin_create_checklist') }}" class="btn btn-dark btn-sm my-1">
+  <div class="align-items-center">
+    <img src="/static/images/2.png" width="50px" class="me-2" />
+    <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
+</div>
+  <a href="{{ url_for('admin_create_checklist') }}" class="btn  btn-sm my-1">
       <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST FOR OPERATOR
   </a>
-  <a href="{{ url_for('admin_create_question') }}" class="btn btn-dark btn-sm my-1">
+  <a href="{{ url_for('admin_create_question') }}" class="btn  btn-sm my-1">
       <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
   </a>
   <a href="{{ url_for('admin_delete_question') }}" class="btn btn-secondary btn-sm my-1">
       <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
   </a>
-  <a href="{{ url_for('admin_edit_question') }}" class="btn btn-dark btn-sm my-1">
+  <a href="{{ url_for('admin_edit_question') }}" class="btn  btn-sm my-1">
       <i class="fas fa-edit me-2"></i>EDIT QUESTIONS
   </a>
+  <a href="{{ url_for('logout') }}" class="btn  btn-sm my-1 ms-auto">
+    <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
+</a>
   <!--<a href="{{ url_for('admin_view_answers') }}" class="btn btn-dark btn-sm my-1">
     <i class="fas fa-clipboard-list me-2"></i>VIEW ANSWERS
 </a>
@@ -25,6 +32,13 @@
 
         {% endblock %}
 {% block content %}
+<div class="d-flex align-items-center brand_images">
+  <h2 class="text-center my-3">Welcome back, 
+    {% if user%}
+    {{user.name}}
+    {% endif %}</h2>
+  <img src="/static/images/freepik.png" width="200px" class="ms-auto" />
+</div>
     <h2 class="text-center">DELETE QUESTION</h2>
     <div class=" p-4">
         {% with messages = get_flashed_messages(with_categories=true) %}

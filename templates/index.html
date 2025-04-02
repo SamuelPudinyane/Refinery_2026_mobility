@@ -13,18 +13,36 @@
         <div class="container">
             <div class="d-flex align-items-center">
                 <img src="/static/images/2.png" width="50px" class="me-2" />
-                <a class="navbar-brand" href="#">RAND REFINERY</a>
+                <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
             </div>
         </div>
     </nav>
-    <div class="container">
-        <div class="container d-flex justify-content-center align-items-center min-vh-100">
-            <div class="card p-4 login-card">
-                <h2 class="text-center mb-4">Login</h2>
+    <div class="container login_card12">
+        <div class="container d-flex justify-content-center align-items-center  login_container">
+            <div class="">
+                <div class=" container login_card1">
+                    <img src="/static/images/Group.png" width="50px" class="me-2" />
+                    <h4>Welcome to Rand Refinery</h4>
+                </div>
+                <div class=" login_card2">
+                    <p>
+                        This system tracks employee locations at the mine to enhance 
+                        safety and efficiency. Your login ensures real-time visibility for 
+                        better coordination and emergency response.
+                    </p>
+                    
+                </div>
+                
+            </div>
+            <div class="p-4 login-card">
+                <div class="container text-center">
+                    <img src="/static/images/2.png" width="50px" class="me-2" />
+                <h2 class="text-center mb-4 login_brand_name">RAND REFINERY</h2>
+                </div>
                 <form method="POST" action="/login">
                     <!-- Username Field with Icon -->
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label">Company Number</label>
                         <div class="input-group">
                             <span class="input-group-text">
                                 <i class="fas fa-user"></i>
@@ -64,6 +82,7 @@
                 {% endwith %}
             </div>
         </div>
+        <img src="/static/images/Address-amico.png" class="bottom-left-img" />
     </div>
 
     <!-- Flash Message Fade Out Script -->

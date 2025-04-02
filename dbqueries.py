@@ -91,16 +91,16 @@ def verify_user_credentials(company_number, password):
     cursor = conn.cursor()
 
     # Fetch stored hashed password, company_number, and role
-    cursor.execute("SELECT id,password, company_number, role FROM rand_refinary_registration WHERE company_number = %s", (company_number,))
+    cursor.execute("SELECT id,password, company_number, role,name FROM rand_refinary_registration WHERE company_number = %s", (company_number,))
     row = cursor.fetchone()
     
     conn.close()
     if row:
-        id,stored_hash, company_number, role = row  # Unpack the row
+        id,stored_hash, company_number, role,name = row  # Unpack the row
     
         # Verify the entered password against the stored hash
         if bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
-            return {"id":id,"company_number": company_number, "role": role}  # Return relevant data
+            return {"id":id,"company_number": company_number, "role": role,"name":name}  # Return relevant data
 
     return None  # Return None if verification fails
 

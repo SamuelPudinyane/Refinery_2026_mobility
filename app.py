@@ -33,7 +33,7 @@ def login():
         user=verify_user_credentials(company_number,password)
        
         session["user"]=user
-       
+        print("user ",session['user'])
         if not user:
             flash("An error has occurred. Make sure your login credentials are correct", "error")
             return redirect(url_for('login'))
@@ -296,6 +296,7 @@ def admin_create_checklist():
 
     operators = get_all_operators()
     user=session['user']
+    print(user)
     plant_sections=[]
     found_admin=get_administrator_with_id(user["id"])
     count=get_count_of_question()

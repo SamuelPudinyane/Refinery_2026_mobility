@@ -5,7 +5,7 @@
 <div class="container-fluid add-admin text-center py-3">
     <div class="align-items-center ">
         <img src="/static/images/2.png" width="50px" class="me-2" />
-        <h5 class="" href="#">RAND REFINERY</h5>
+        <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
     </div>
   <a href="{{ url_for('admin_create_checklist') }}" class="btn btn-secondary btn-sm my-1">
       <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST FOR OPERATOR
@@ -53,9 +53,11 @@
                 </span>
                 <select class="form-select" name="section" id="section" required>
                     <option value="">-- Filter --</option>
+                    {% if plant_Sections %}
                     {% for item in plant_sections %}
                         <option value="{{ item }}">{{ item }}</option>
                     {% endfor %}
+                    {% endif %}
                 </select>
             </div>
         </div>

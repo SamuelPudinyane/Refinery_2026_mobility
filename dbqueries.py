@@ -20,37 +20,37 @@ import os
 
 """
 
-def get_db_connection():
-    try:
-        # Use environment variables for connection parameters
-        conn = psycopg2.connect(
-            dbname="rand_refinary", 
-            user="postgres",  
-            password="Admin",  
-            host="localhost", 
-            port=5432 
-        )
-        return conn
-    except Exception as e:
-        print(f"Error connecting to PostgreSQL database: {e}")
-        return None
-
-
-
 # def get_db_connection():
 #     try:
 #         # Use environment variables for connection parameters
 #         conn = psycopg2.connect(
-#             dbname="mobility_app", 
-#             user="mobility_app_user",  
-#             password="6gYNmrAofVijLNkB9RZOJbAhNE64vw4U",  
-#             host="dpg-cv79pjjtq21c73anf3ug-a", 
+#             dbname="rand_refinary", 
+#             user="postgres",  
+#             password="Admin",  
+#             host="localhost", 
 #             port=5432 
 #         )
 #         return conn
 #     except Exception as e:
 #         print(f"Error connecting to PostgreSQL database: {e}")
 #         return None
+
+
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
+            user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
+            password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
+            host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
+            port=os.getenv("DB_PORT", "5432")  
+        )
+        print("Database Connection Successful!")
+        return conn
+    except Exception as e:
+        print(f"Database Connection Error: {e}")
+        return None
+
 
 
 # Database connection function
@@ -323,6 +323,33 @@ def delete_checklist_questions(id):
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
 
+
+def delete_assined_sections():
+    """Deletes an administrator from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Delete Query
+        query = "DELETE FROM administrator "
+        cur.execute(query,)  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
 
 
 

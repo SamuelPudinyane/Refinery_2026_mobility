@@ -6,7 +6,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
                         get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
                         get_all_answered_questions,delete_all_unanswered_questions,store_answers,get_count_of_question,delete_checklist_questions,
-
+                        delete_assined_sections,
                        )
 from datetime import datetime
 import json
@@ -49,7 +49,7 @@ def login():
             return redirect(url_for('operator'))
         
         elif user['role']=='superadmin':
-            return render_template("superAdmin.html")
+            return redirect(url_for("register"))
 
     return render_template('index.html')
 
@@ -556,8 +556,14 @@ def delete_location(plant_section):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
-
+    delete_assined_sections()
+    user=session['user']
+    admins=get_all_administrators()
+    administrator=get_all_administrators_on_all_sections()
+    for items in administrator:
+        items['company_number']=items['admin'].split("-")[0]
+        items['username']=items['admin'].split("-")[1]
+    print("admins ",admins)
     if request.method=='POST':
         company_number=request.form.get('company_number')
         username=request.form.get('username')
@@ -565,7 +571,14 @@ def register():
         role=request.form.get('role')
         insert_registerd_user(company_number.upper(), password.strip(), role,username.upper().strip())
         flash("User registered successfully")
-    return render_template('superAdmin.html')
+    return render_template('superAdmin.html',user=user,admins=admins,administrator=administrator)
+
+@app.route('/delete_assigned_section',methods=['GET','POST'])
+def delete_assigned_section():
+    return None
+
+
+
 
 from geopy.distance import geodesic
 

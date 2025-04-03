@@ -26,15 +26,15 @@
             </a>
         </div>
     </nav>
-    
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="d-flex align-items-center brand_images">
+     <div class="d-flex align-items-center brand_images">
             <h2 class="text-center my-3">Welcome back, 
                 {% if user%}
                 {{user.name}}
                 {% endif %}</h2>
             <img src="/static/images/freepik.png" width="200px" class="ms-auto" />
         </div>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+       
         <div class="card p-4 register-card">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -108,6 +108,38 @@
                 </button>
             </form>
         </div>
+    </div>
+    <div>
+        <table class="list-unstyled table table-striped">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-industry me-2"></i>PLANT SECTION</th>
+                    <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
+                    <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if administrator %}
+                    {% for item in administrator %}
+                        <tr>
+                            <td>{{ item.plant_section | upper }}</td>
+                            <td>{{ item.company_number | upper }}</td>
+                            <td>{{ item.username | upper }}</td>
+                            <td><a class="btn btn-success btn-add-admin" href="url_for('')">
+                                <i class="fas fa-trash-alt me-2"></i>Delete
+                            </a></td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <i class="fas fa-exclamation-circle me-2"></i>There are no Administrators registered.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 
     <!-- Bootstrap JS -->

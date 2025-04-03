@@ -20,36 +20,36 @@ import os
 
 """
 
-# def get_db_connection():
-#     try:
-#         # Use environment variables for connection parameters
-#         conn = psycopg2.connect(
-#             dbname="rand_refinary", 
-#             user="postgres",  
-#             password="Admin",  
-#             host="localhost", 
-#             port=5432 
-#         )
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to PostgreSQL database: {e}")
-#         return None
-
-
 def get_db_connection():
     try:
+        # Use environment variables for connection parameters
         conn = psycopg2.connect(
-            dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
-            user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
-            password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
-            host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
-            port=os.getenv("DB_PORT", "5432")  
+            dbname="rand_refinary", 
+            user="postgres",  
+            password="Admin",  
+            host="localhost", 
+            port=5432 
         )
-        print("Database Connection Successful!")
         return conn
     except Exception as e:
-        print(f"Database Connection Error: {e}")
+        print(f"Error connecting to PostgreSQL database: {e}")
         return None
+
+
+# def get_db_connection():
+#     try:
+#         conn = psycopg2.connect(
+#             dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
+#             user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
+#             password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
+#             host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
+#             port=os.getenv("DB_PORT", "5432")  
+#         )
+#         print("Database Connection Successful!")
+#         return conn
+#     except Exception as e:
+#         print(f"Database Connection Error: {e}")
+#         return None
 
 
 
@@ -1147,6 +1147,7 @@ def get_all_answered_questions_by_plant_section(plant_section):
     Retrieves all records from the questions table for a specific plant section
     where checklist_answers is not null or empty.
     """
+    print("Fetching records for plant section:", plant_section)
     conn = None
     results = []
 
@@ -1154,39 +1155,51 @@ def get_all_answered_questions_by_plant_section(plant_section):
         # Connect to PostgreSQL
         conn = get_db_connection()
         if conn is None:
+            print("Error: Database connection failed.")
             return None  # Return None if connection fails
 
         cur = conn.cursor()
-
-        # Select query to fetch all records
-        select_query = sql.SQL("""
+       
+        # Select query to fetch all records for the specified plant section
+        select_query = """
             SELECT id, checklist_answers, location, plant_section, 
                    company_number, operator, operators_location, time_stamp
             FROM public.questions
             WHERE plant_section = %s
-              AND checklist_answers IS NOT NULL
-              OR checklist_answers != '[null]'
-              OR checklist_answers != ''
-            LIMIT 20
-        """)
+            AND 
+            (checklist_answers IS NOT NULL
+            OR checklist_answers::text != 'null'
+            OR checklist_answers::text != '[]'
+            OR checklist_answers::text != '{}'
+            OR checklist_answers::text != ''
+            OR checklist_answers::text != '[null]'
+            OR jsonb_array_length(checklist_answers::jsonb) > 0)
+        """
         
         cur.execute(select_query, (plant_section,))
         rows = cur.fetchall()
 
-        # Convert the results to a list of dictionaries
-        columns = [desc[0] for desc in cur.description]  # Get column names
-        results = [dict(zip(columns, row)) for row in rows]
+        # Ensure we have column names before processing
+        if cur.description:
+            columns = [desc[0] for desc in cur.description]  # Get column names
+            results = [dict(zip(columns, row)) for row in rows]
+        else:
+            print("Warning: No column descriptions found.")
 
+        print("Fetched results:", results)
         return results  # Return all records as a list of dictionaries
 
     except psycopg2.Error as e:
-        print("Error fetching questions:", e)
+        print("Database error while fetching questions:", e)
         return None  # Indicate failure
 
     finally:
+        # Ensure cursor and connection are closed
         if conn:
-            cur.close()
-            conn.close()  # Ensure the connection is closed
+            if 'cur' in locals():
+                cur.close()
+            conn.close()
+
 
 
 

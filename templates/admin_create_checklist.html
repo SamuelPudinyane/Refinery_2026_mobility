@@ -53,7 +53,7 @@
                 </span>
                 <select class="form-select" name="section" id="section" required>
                     <option value="">-- Filter --</option>
-                    {% if plant_Sections %}
+                    {% if plant_sections %}
                     {% for item in plant_sections %}
                         <option value="{{ item }}">{{ item }}</option>
                     {% endfor %}

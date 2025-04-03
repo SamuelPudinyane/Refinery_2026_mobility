@@ -39,8 +39,7 @@ def login():
             return redirect(url_for('login'))
         
         if user['role']=='master_administrator':
-            administrator=get_all_administrators()
-            return render_template('masterAdmin_addAdmin.html',administrator=administrator,user=user)
+            return redirect(url_for('master_add'))
         
         elif user['role']=='administrator':
             return redirect(url_for('admin_create_checklist')) 
@@ -213,14 +212,14 @@ def admin_delete_question():
             })
         else:
             question_ids = request.form.getlist("question_ids[]")
-        
+            print("list od question_ids ",question_ids)
             if question_ids:
                     for id in question_ids:
                         
                         # Call a function to delete the selected questions
                         delete_selected_questions(id)
                         flash("Question successfully deleted", "success")
-                        return redirect(url_for('admin_delete_question'))
+                    return redirect(url_for('admin_delete_question'))
     return render_template('admin_delete_questions.html',questions=questions,plant_sections=plant_sections,user=user)
 
 
@@ -331,9 +330,10 @@ def admin_create_checklist():
         # Handle form submission
         else:
             section = request.form.get("section")
-            print("section ",section.lower())
+            print("section ",section)
             select = request.form.get("select")
-            location=get_all_locations_by_plant_section(section.lower())
+            print("selected plant ", select)
+            location=get_all_locations_by_plant_section(section)
             print("location ",location)
             Checked_questions=request.form.getlist("question_id[]")
             operators_questions=[]
@@ -373,7 +373,7 @@ def admin_create_checklist():
         for item in count:
             print("item ",type(json.loads(item['checklist_questions'])))
             item['checklist_questions']=json.loads(item['checklist_questions'])
-    print("counting",user)
+   
     # Render the template for GET requests
     return render_template('admin_create_checklist.html',user=user,count=count, operators=operators, questions=questions,plant_sections=plant_sections)
 
@@ -426,18 +426,19 @@ def admin_view_unanswered_questions():
     
     return render_template("admin_view_unanswered_questions.html")
 
-@app.route('/api/answered_questions', methods=['GET'])
-def get_answered_questions():
+@app.route('/api/answered_questions/<plant_section>', methods=['GET'])
+def get_answered_questions(plant_section):
 
     if is_logged_out():
         return redirect(url_for('login'))
 
-    plant_section = request.args.get('plant_section')  # Get plant_section from query parameters
-    
+    plant_section = plant_section.upper().strip()  # Get plant_section from query parameters
+    print("section ",plant_section)
     if not plant_section:
         return jsonify({"error": "plant_section parameter is required"}), 400
 
     results=get_all_answered_questions_by_plant_section(plant_section)
+    print(results)
     return jsonify(results)  # Return all records as JSON
 
 
@@ -463,7 +464,7 @@ def operator():
         if questions_data:
             location = json.loads(questions_data[0]['location'])
             target_location = location[0]
-
+            print("loca -- ",target_location)
             # Check if the user is within range
             is_within = is_within_range(
                 str(user_lat), str(user_lon),
@@ -482,28 +483,29 @@ def operator():
 
             # Include operators_questions in the response if within range
             if is_within:
-
+                print("im here on the location -- ", is_within)
                 # Store the answers in the database
                 if user_answers:
                     output = store_answers(checklist_id, user_answers)
                     print("user_answers --",output)
                     if output:
-                        flash("Checklist submitted successfully")
-                        return redirect(url_for('operator'))
+                        response_data['message'] = 'Checklist submitted successfully'
+                        
                     else:
-                        flash("Error occurred while submitting checklist")
+                        response_data['status'] = 'error'
+                        response_data['message'] = 'Error submitting checklist'
                 else:
                     flash("No answers provided.")
 
             # Return the result as JSON
             return jsonify(response_data)
-
     # For GET requests, render the template
     questions = get_all_questions_by_company_number(user['company_number'])
+    operators_questions=[]
     if questions:
-        questions = json.loads(questions[0]['checklist_questions'])
+        operators_questions = json.loads(questions[0]['checklist_questions'])
 
-    return render_template('operator.html', operators_questions=questions,user=user)
+    return render_template('operator.html', operators_questions=operators_questions,user=user)
 
 
 

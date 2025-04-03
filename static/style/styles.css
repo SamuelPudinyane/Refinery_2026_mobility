@@ -32,7 +32,7 @@ body {
     align-items: center;
     z-index: 999;
     margin: 20px;
-    background: #02295C;
+    background: #223D3C;
     font-family: Inter;
     padding: 20px;
     transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
@@ -184,7 +184,7 @@ label {
     color: #797206;
 }
 .brand_images{    
-    background: linear-gradient(to right, #F2F5FF, #0B025A);
+    background: linear-gradient(to right, #F2F5FF, #223D3C);
     border-radius: 30px;
 }
 .navbar-brand{

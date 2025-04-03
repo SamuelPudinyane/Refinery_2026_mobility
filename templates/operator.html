@@ -176,11 +176,19 @@ document.getElementById('checklist-form').addEventListener('submit', function (e
             }),
         })
         .then((response) => response.json())
-        .then((data) => {
-            alert('Checklist submitted successfully!');
-            console.log('Server Response:', data);
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.is_within_range) {
+                    alert(data.message || 'Checklist submitted successfully!');
+                    window.location.reload();  // Refresh to show new state
+                } else {
+                    alert('You are not within the required range!');
+                }
+            } else {
+                alert(data.message || 'Error submitting checklist');
+            }
         })
-        .catch((error) => {
+        .catch(error => {
             console.error('Error:', error);
             alert('Failed to submit checklist.');
         });

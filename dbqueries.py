@@ -20,36 +20,36 @@ import os
 
 """
 
-# def get_db_connection():
-#     try:
-#         # Use environment variables for connection parameters
-#         conn = psycopg2.connect(
-#             dbname="rand_refinary", 
-#             user="postgres",  
-#             password="Admin",  
-#             host="localhost", 
-#             port=5432 
-#         )
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to PostgreSQL database: {e}")
-#         return None
-
-
 def get_db_connection():
     try:
+        # Use environment variables for connection parameters
         conn = psycopg2.connect(
-            dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
-            user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
-            password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
-            host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
-            port=os.getenv("DB_PORT", "5432")  
+            dbname="rand_refinary", 
+            user="postgres",  
+            password="Admin",  
+            host="localhost", 
+            port=5432 
         )
-        print("Database Connection Successful!")
         return conn
     except Exception as e:
-        print(f"Database Connection Error: {e}")
+        print(f"Error connecting to PostgreSQL database: {e}")
         return None
+
+
+# def get_db_connection():
+#     try:
+#         conn = psycopg2.connect(
+#             dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
+#             user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
+#             password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
+#             host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
+#             port=os.getenv("DB_PORT", "5432")  
+#         )
+#         print("Database Connection Successful!")
+#         return conn
+#     except Exception as e:
+#         print(f"Database Connection Error: {e}")
+#         return None
 
 
 

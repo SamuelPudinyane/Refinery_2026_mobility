@@ -6,7 +6,7 @@ from dbqueries import (insert_registerd_user,get_db_connection,verify_user_crede
                        get_administrator_with_id,insert_into_section_location,get_all_locations,get_all_plant_sections,get_all_plantsection_and_question,get_all_locations_by_plant_section,
                         get_operator_with_id,insert_question,get_all_questions_by_company_number,delete_from_super_admin,get_all_answered_questions_by_plant_section,
                         get_all_answered_questions,delete_all_unanswered_questions,store_answers,get_count_of_question,delete_checklist_questions,
-                        delete_assined_sections,
+                        delete_assined_sections,delete_assined_sections_by_section
                        )
 from datetime import datetime
 import json
@@ -544,9 +544,11 @@ def delete_location(plant_section):
     # Delete the location and unanswered questions
     results = delete_from_super_admin(plant_section)
     unanswered_questions = delete_all_unanswered_questions(plant_section)
+    
 
     if results:
         print("Location deleted:", results, "Deleted unanswered questions:", unanswered_questions)
+        delete_assined_sections_by_section(plant_section)
         flash("Location deleted from your repository", "success")
     else:
         flash("Failed to delete location", "error")
@@ -556,7 +558,7 @@ def delete_location(plant_section):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    delete_assined_sections()
+    
     user=session['user']
     admins=get_all_administrators()
     administrator=get_all_administrators_on_all_sections()
@@ -573,9 +575,11 @@ def register():
         flash("User registered successfully")
     return render_template('superAdmin.html',user=user,admins=admins,administrator=administrator)
 
-@app.route('/delete_assigned_section',methods=['GET','POST'])
-def delete_assigned_section():
-    return None
+@app.route('/delete_assigned_section/<id>',methods=['GET','POST'])
+def delete_assigned_section(id):
+    delete_assined_sections(id)
+    flash("assignment removed")
+    return redirect(url_for('register'))
 
 
 

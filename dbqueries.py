@@ -324,7 +324,7 @@ def delete_checklist_questions(id):
         return False  # Return False in case of an error
 
 
-def delete_assined_sections():
+def delete_assined_sections(id):
     """Deletes an administrator from the PostgreSQL database."""
     try:
         # Connect to PostgreSQL
@@ -332,8 +332,8 @@ def delete_assined_sections():
         cur = conn.cursor()
 
         # Delete Query
-        query = "DELETE FROM administrator "
-        cur.execute(query,)  # Fixed parameter order
+        query = "DELETE FROM administrator WHERE admin_id=%s"
+        cur.execute(query,(id,))  # Fixed parameter order
 
         # Check if deletion was successful
         if cur.rowcount > 0:  # rowcount returns number of affected rows
@@ -350,6 +350,35 @@ def delete_assined_sections():
     except psycopg2.Error as e:
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
+
+
+def delete_assined_sections_by_section(plant_section):
+    """Deletes an administrator from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Delete Query
+        query = "DELETE FROM administrator WHERE plant_section=%s"
+        cur.execute(query,(plant_section,))  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
+
 
 
 

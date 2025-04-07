@@ -3,13 +3,22 @@
 {% block title %}REMOVE ADMINISTRATORS{% endblock %}
 
 {% block sidebar %}
-<div class="container-fluid add-admin text-center py-3">
+<div id="sidebar" class="sidebar-container">
+    <!-- Toggle Button (Visible only on mobile) -->
+    <button id="sidebarToggle" class="sidebar-toggle d-lg-none" type="button">
+        <i class="fas fa-bars"></i> Menu
+    </button>
+
+    <!-- Sidebar Content -->
+    <div class="container-fluid add-admin text-center py-3 sidebar-content" id="sidebarContent" >
     <div class="align-items-center">
         <img src="/static/images/2.png" width="50px" class="me-2" />
         <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
     </div>
+    <br><br>
+    <div class="d-flex flex-column justify-content-center gap-2 mt-3">
   <a href="{{ url_for('master_add') }}" class="btn btn-sm my-1">
-      <i class="fas fa-user-plus me-2"></i>ADD ADMINISTRATORS
+      <i class="fas fa-user-plus me-2"></i>ASSIGN ADMINISTRATORS
   </a>
   <a href="{{ url_for('master_remove') }}" class="btn btn-secondary btn-sm my-1" data-bs-toggle="tooltip" title="Remove administrators">
     <i class="fas fa-user-minus me-2"></i>REMOVE ADMINISTRATORS
@@ -24,16 +33,18 @@
     <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
 </a>
 </div>
+</div>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <div class="d-flex align-items-center brand_images">
-            <h2 class="text-center my-3">Welcome back, 
-                {% if user%}
-                {{user.name}}
-                {% endif %}</h2>
-            <img src="/static/images/freepik.png" width="200px" class="ms-auto" />
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
+            <h2 class="my-3">Welcome back,
+                {% if user %}
+                    {{ user.name }}
+                {% endif %}
+            </h2>
+            <img src="/static/images/freepik.png" width="150px" class="ms-md-auto mt-3 mt-md-0" />
         </div>
         <h2 class="text-center my-3">REMOVE ADMINISTRATOR</h2>
         <div class="p-3">
@@ -59,7 +70,7 @@
                         <i class="fas fa-building"></i>
                     </span>
                     <select class="form-select" name="section" id="section">
-                        <option value="">-- Select Section --</option>
+                        <option value="" disabled selected>-- Select Section --</option>
                         {% if plant_section %}
                             {% for item in plant_section %}
                                 <option value="{{ item.plant_section | upper }}">{{ item.plant_section | upper }}</option>
@@ -110,6 +121,29 @@
           var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
           });
+        // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get elements safely with null checks
+        const toggleButton = document.querySelector('.sidebar-toggle');
+        const sidebarContent = document.querySelector('.sidebar-content');
         
+        // Only add event listeners if elements exist
+        if (toggleButton && sidebarContent) {
+            toggleButton.addEventListener('click', function() {
+                sidebarContent.classList.toggle('active');
+            });
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebarContent.contains(event.target) && 
+                    event.target !== toggleButton &&
+                    window.innerWidth < 992) {
+                    sidebarContent.classList.remove('active');
+                }
+            });
+        } else {
+            console.error('Sidebar elements not found');
+        }
+    });
       </script>
 {% endblock %}

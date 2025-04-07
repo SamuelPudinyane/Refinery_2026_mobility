@@ -264,18 +264,19 @@ def admin_edit_question():
             question_id = request.form.get("question_id")
             print("this id ",question_id)
             question=get_one_question(question_id)
+            print("question ",question)
             return render_template('admin_modify_question.html',question=question,plant_sections=plant_sections,user=user)
     
     return render_template('admin_edit_question.html',questions=questions,plant_sections=plant_sections,user=user)
 
-@app.route('/admin_modify_question',methods=["GET","POST"])
-def admin_modify_question():
-
+@app.route('/admin_modify_question/<id>',methods=["GET","POST"])
+def admin_modify_question(id):
+    print("id ",id)
     if is_logged_out():
         return redirect(url_for('login'))
     user=session['user']
     if request.method=="POST":
-        
+       
         question = request.form.get("question")
         question_type = request.form.get("question_type")
         options = request.form.getlist("options[]")

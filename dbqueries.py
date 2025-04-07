@@ -20,36 +20,36 @@ import os
 
 """
 
-def get_db_connection():
-    try:
-        # Use environment variables for connection parameters
-        conn = psycopg2.connect(
-            dbname="rand_refinary", 
-            user="postgres",  
-            password="Admin",  
-            host="localhost", 
-            port=5432 
-        )
-        return conn
-    except Exception as e:
-        print(f"Error connecting to PostgreSQL database: {e}")
-        return None
-
-
 # def get_db_connection():
 #     try:
+#         # Use environment variables for connection parameters
 #         conn = psycopg2.connect(
-#             dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
-#             user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
-#             password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
-#             host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
-#             port=os.getenv("DB_PORT", "5432")  
+#             dbname="rand_refinary", 
+#             user="postgres",  
+#             password="Admin",  
+#             host="localhost", 
+#             port=5432 
 #         )
-#         print("Database Connection Successful!")
 #         return conn
 #     except Exception as e:
-#         print(f"Database Connection Error: {e}")
+#         print(f"Error connecting to PostgreSQL database: {e}")
 #         return None
+
+
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
+            user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
+            password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
+            host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
+            port=os.getenv("DB_PORT", "5432")  
+        )
+        print("Database Connection Successful!")
+        return conn
+    except Exception as e:
+        print(f"Database Connection Error: {e}")
+        return None
 
 
 
@@ -105,6 +105,23 @@ def verify_user_credentials(company_number, password):
     return None  # Return None if verification fails
 
 
+
+def user_exist_credentials(company_number):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch stored hashed password, company_number, and role
+    cursor.execute("SELECT id,password, company_number, role,name FROM rand_refinary_registration WHERE company_number = %s", (company_number,))
+    row = cursor.fetchone()
+    
+    conn.close()
+    if row:
+    
+        return True
+
+    return False  # Return None if verification fails
+
+
 def get_all_administrators():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -119,6 +136,23 @@ def get_all_administrators():
     administrators = [{"id": row[0],"name":row[1], "company_number": row[2],"role":row[3]} for row in rows]
 
     return administrators
+
+
+def get_all_users():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch all users with role = 'administrator'
+    cursor.execute("SELECT id,name,company_number, role FROM rand_refinary_registration")
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    # Convert query result into a list of dictionaries
+    users = [{"id": row[0],"name":row[1], "company_number": row[2],"role":row[3]} for row in rows]
+
+    return users
+
 
 
 def insert_into_admin(plant_section, admin, admin_id):
@@ -350,6 +384,37 @@ def delete_assined_sections(id):
     except psycopg2.Error as e:
         print("Error deleting admin:", e)
         return False  # Return False in case of an error
+
+
+
+def delete_the_user(id):
+    """Deletes an rand_refinary_registration from the PostgreSQL database."""
+    try:
+        # Connect to PostgreSQL
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Delete Query
+        query = "DELETE FROM rand_refinary_registration WHERE id=%s"
+        cur.execute(query,(id,))  # Fixed parameter order
+
+        # Check if deletion was successful
+        if cur.rowcount > 0:  # rowcount returns number of affected rows
+            conn.commit()
+            result = True  # Successfully deleted
+        else:
+            result = False  # No rows were deleted (admin_id not found)
+
+        # Close connection
+        cur.close()
+        conn.close()
+        return result
+
+    except psycopg2.Error as e:
+        print("Error deleting admin:", e)
+        return False  # Return False in case of an error
+
+
 
 
 def delete_assined_sections_by_section(plant_section):

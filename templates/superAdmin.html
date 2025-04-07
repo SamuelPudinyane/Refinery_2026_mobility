@@ -106,30 +106,37 @@
                 <button type="submit" class="btn btn-success w-100">
                     <i class="fas fa-user-plus me-2"></i>Register
                 </button>
+               
             </form>
+            <br>
+            <br>
+            <a href="{{url_for('login')}}"><i class="btn btn-success w-100 fas fa-sign-in-alt me-2"> Login</i> </a>
         </div>
     </div>
     <div>
         <table class="list-unstyled table table-striped">
             <thead>
                 <tr>
-                    <th><i class="fas fa-industry me-2"></i>PLANT SECTION</th>
+                    
                     <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
                     <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
+                    <th><i class="fas fa-industry me-2"></i>ROLE</th>
                     <th>ACTION</th>
                 </tr>
             </thead>
             <tbody>
-                {% if administrator %}
-                    {% for item in administrator %}
+                {% if users %}
+                    {% for item in users %}
                         <tr>
-                            <td>{{ item.plant_section | upper }}</td>
+                            
                             <td>{{ item.company_number | upper }}</td>
-                            <td>{{ item.username | upper }}</td>
+                            <td>{{ item.name | upper }}</td>
+                            <td>{{ item.role | upper }}</td>
                             <td>
-                                <!--<a class="btn btn-success btn-add-admin" href="{{url_for('delete_assigned_section',id=item.admin_id)}}">
+                                <a class="btn btn-danger" href="{{url_for('delete_user',id=item.id)}}" 
+                                onclick="return confirmDelete();">
                                 <i class="fas fa-trash-alt me-2"></i>Delete
-                            </a>-->
+                            </a>
                         </td>
                         </tr>
                     {% endfor %}
@@ -143,7 +150,40 @@
             </tbody>
         </table>
     </div>
-
+<div>
+    <table class="list-unstyled table table-striped">
+        <thead>
+            <tr>
+                <th><i class="fas fa-industry me-2"></i>PLANT SECTION</th>
+                <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
+                <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
+                <th>ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if administrator %}
+                {% for item in administrator %}
+                    <tr>
+                        <td>{{ item.plant_section | upper }}</td>
+                        <td>{{ item.company_number | upper }}</td>
+                        <td>{{ item.username | upper }}</td>
+                        <td>
+                            <!--<a class="btn btn-success btn-add-admin" href="{{url_for('delete_assigned_section',id=item.admin_id)}}">
+                            <i class="fas fa-trash-alt me-2"></i>Delete
+                        </a>-->
+                    </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">
+                        <i class="fas fa-exclamation-circle me-2"></i>There are no Administrators registered.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -156,6 +196,9 @@
           setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
         }
       }, 4000); // 4000ms = 4 seconds
+      function confirmDelete() {
+        return confirm("Are you sure you want to delete this item? This action cannot be undone.");
+    }
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 {% block title %}ADD ADMINISTRATORS{% endblock %}
 
 {% block sidebar %}
-<div id="sidebar" class="sidebar-container">
+<div id="sidebar" class="sidebar-container ">
     <!-- Toggle Button (Visible only on mobile) -->
     <button id="sidebarToggle" class="sidebar-toggle d-lg-none" type="button">
         <i class="fas fa-bars"></i> Menu
@@ -38,7 +38,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container col-12 col-md-10 col-lg-12">
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
             <h2 class="my-3">Welcome back,
                 {% if user %}
@@ -47,7 +47,7 @@
             </h2>
             <img src="/static/images/freepik.png" width="150px" class="ms-md-auto mt-3 mt-md-0" />
         </div>
-        <h2 class="text-center my-3">ADD ADMINISTRATOR</h2>
+        <h2 class="text-center my-3">ASSIGN ADMINISTRATOR</h2>
         <div class="p-3">
           {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -67,10 +67,9 @@
                   <div class="mb-3">
                       <label class="form-label">Select Section</label>
                       <div class="input-group">
-                          <span class="input-group-text">
-                              <i class="fas fa-building"></i>
-                          </span>
+                       
                           <select class="form-select" name="section" id="section">
+                           
                               <option value="" disabled selected>-- Select Section --</option>
                               {% if plant_section %}
                                   {% for item in plant_section %}
@@ -141,5 +140,7 @@
             console.error('Sidebar elements not found');
         }
     });
+
+    
     </script>
 {% endblock %}

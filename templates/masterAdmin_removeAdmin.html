@@ -37,7 +37,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container col-12 col-md-10 col-lg-12">
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
             <h2 class="my-3">Welcome back,
                 {% if user %}
@@ -66,9 +66,7 @@
             <div class="mb-3">
                 <label class="form-label">Select Section</label>
                 <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-building"></i>
-                    </span>
+                   
                     <select class="form-select" name="section" id="section">
                         <option value="" disabled selected>-- Select Section --</option>
                         {% if plant_section %}

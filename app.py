@@ -484,10 +484,10 @@ def operator():
         session['user_lon'] = user_lon
 
         # Get the target location and range
-        questions_data = get_all_questions_by_company_number(user['company_number'])
-        print("data ",questions_data)
-        if questions_data and len(questions_data) > 0:
-            location = json.loads(questions_data[0]['location'])
+        questions = get_all_questions_by_company_number(user['company_number'])
+        print("data ",questions)
+        if questions and len(questions) > 0:
+            location = json.loads(questions[0]['location'])
             target_location = location[0]
             print("loca -- ",target_location)
             # Check if the user is within range
@@ -496,15 +496,15 @@ def operator():
                 target_location['latitude'], target_location['longitude'],
                 target_location['range']
             )
-
+            print("is within ",is_within)
             # Prepare the response
             response_data = {
                 'status': 'success',
                 'is_within_range': is_within,
                 'user_answers': [],  # Initialize an empty list for mapped answers
             }
-            checklist_id = questions_data[0]['id']
-            print("cklst", questions_data, " my_id ", checklist_id)
+            checklist_id = questions[0]['id']
+            print("cklst", questions, " my_id ", checklist_id)
 
             # Include operators_questions in the response if within range
             if is_within:
@@ -525,7 +525,7 @@ def operator():
             # Return the result as JSON
             return jsonify(response_data)
     # For GET requests, render the template
-    questions = get_all_questions_by_company_number(user['company_number'])
+    
     operators_questions=[]
     if questions:
         operators_questions = json.loads(questions[0]['checklist_questions'])

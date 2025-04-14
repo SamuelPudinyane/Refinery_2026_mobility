@@ -1,48 +1,68 @@
 {% extends "base.html" %}
 
 {% block title %}ADMINISTRATORS{% endblock %}
-{% block sidebar %}
-<div id="sidebar" class="sidebar-container">
-    <!-- Toggle Button (Visible only on mobile) -->
-    <button id="sidebarToggle" class="sidebar-toggle d-lg-none" type="button">
-        <i class="fas fa-bars"></i> Menu
-    </button>
-
-    <!-- Sidebar Content -->
-    <div class="container-fluid add-admin text-center py-3 sidebar-content" id="sidebarContent" >
-    <div class="align-items-center">
-        <img src="/static/images/2.png" width="50px" class="me-2" />
-        <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
-    </div>
-    <br><br>
-    <div class="d-flex flex-column justify-content-center gap-2 mt-3">
-  <a href="{{ url_for('admin_create_checklist') }}" class="btn  btn-sm my-1">
-      <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST
-  </a>
-  <a href="{{ url_for('admin_create_question') }}" class="btn  btn-sm my-1">
-      <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
-  </a>
-  <a href="{{ url_for('admin_delete_question') }}" class="btn  btn-sm my-1">
-      <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
-  </a>
-  <a href="{{ url_for('admin_edit_question') }}" class="btn  btn-sm my-1">
-      <i class="fas fa-edit me-2"></i>EDIT QUESTIONS
-  </a>
-  <a href="{{ url_for('logout') }}" class="btn  btn-sm my-1 ms-auto">
-    <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
-</a>
-</div>
   <!--<a href="{{ url_for('admin_view_answers') }}" class="btn btn-dark btn-sm my-1">
     <i class="fas fa-clipboard-list me-2"></i>VIEW ANSWERS
 </a>
 <a href="{{ url_for('admin_view_unanswered_questions') }}" class="btn btn-dark btn-sm my-1">
   <i class="fas fa-edit me-2"></i>UNANSWERED QUESTIONS
 </a>-->
-</div>
-{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
+<nav class="navbar p-2">
+    <div class="container">
+        <div class="d-flex align-items-center w-100">
+            <img src="/static/images/2.png" width="50px" class="me-2" />
+            <h5 class="navbar-brand mb-0">RAND REFINERY</h5>
+  
+            <!-- Sidebar Toggle Button (only on small screens) -->
+            <button id="sidebarToggle" class="btn btn-outline-secondary d-lg-none ms-auto" type="button">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+  
+            <!-- Desktop Menu (hidden on small screens) -->
+            <div class="d-none d-lg-flex gap-2 ms-auto">
+                <a href="{{ url_for('admin_create_checklist') }}" class="btn btn-sm my-1">
+                    <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST
+                </a>
+                <a href="{{ url_for('admin_create_question') }}" class="btn btn-sm my-1">
+                    <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
+                </a>
+                <a href="{{ url_for('admin_delete_question') }}" class="btn btn-sm my-1">
+                    <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
+                </a>
+                <a href="{{ url_for('admin_edit_question') }}" class="btn btn-secondary btn-sm my-1">
+                    <i class="fas fa-edit me-2"></i>EDIT QUESTIONS
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
+                    <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
+                </a>
+            </div>
+        </div>
+    </div>
+  </nav>
+  
+  <!-- Sidebar Content (for small screens) -->
+  <div class="sidebar-content p-3">
+    <ul class="list-unstyled">
+        <li><a href="{{ url_for('admin_create_checklist') }}" class="btn btn-sm my-1">
+            <i class="fas fa-clipboard-list me-2"></i>CREATE CHECKLIST
+        </a></li>
+        <li><a href="{{ url_for('admin_create_question') }}" class="btn btn-sm my-1">
+            <i class="fas fa-plus-circle me-2"></i>CREATE QUESTIONS
+        </a></li>
+        <li><a href="{{ url_for('admin_delete_question') }}" class="btn btn-sm my-1">
+            <i class="fas fa-trash-alt me-2"></i>DELETE QUESTIONS
+        </a></li>
+        <li><a href="{{ url_for('admin_edit_question') }}" class="btn btn-secondary btn-sm my-1">
+            <i class="fas fa-edit me-2"></i>EDIT QUESTIONS
+        </a></li>
+        <li><a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
+            <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
+        </a></li>
+    </ul>
+  </div>
+<div class="container col-12 col-md-10 col-lg-12 mt-4 d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
     <h2 class="my-3">Welcome back,
         {% if user %}
             {{ user.name }}
@@ -209,28 +229,33 @@
         .catch(error => console.error("Error:", error));
       });
       // Wait for DOM to be fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get elements safely with null checks
-        const toggleButton = document.querySelector('.sidebar-toggle');
-        const sidebarContent = document.querySelector('.sidebar-content');
-        
-        // Only add event listeners if elements exist
-        if (toggleButton && sidebarContent) {
-            toggleButton.addEventListener('click', function() {
-                sidebarContent.classList.toggle('active');
-            });
-            
-            // Close sidebar when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!sidebarContent.contains(event.target) && 
-                    event.target !== toggleButton &&
-                    window.innerWidth < 992) {
-                    sidebarContent.classList.remove('active');
-                }
-            });
-        } else {
-            console.error('Sidebar elements not found');
-        }
-    });
+    // Flash message timeout
+setTimeout(() => {
+    const flashMessage = document.getElementById("flash-message-container");
+    if (flashMessage) {
+        flashMessage.style.transition = "opacity 0.5s ease-out";
+        flashMessage.style.opacity = "0";
+        setTimeout(() => flashMessage.remove(), 500);
+    }
+}, 4000);
+
+// Sidebar toggle script
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar-content');
+
+    if (toggleButton && sidebar) {
+        toggleButton.addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent document click
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!sidebar.contains(event.target) && event.target !== toggleButton) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+});
     </script>
 {% endblock %}

@@ -1,28 +1,43 @@
 {% extends "base.html" %}
 {% block title %}Checklist Form{% endblock %}
 
-<div class="text-center py-3">
-    <h5 class="navbar-brand">RAND REFINERY</h5>
+{% block content %}
+<nav class="navbar p-2">
+    <div class="container">
+        <div class="d-flex align-items-center w-100">
+            <img src="/static/images/2.png" width="50px" class="me-2" />
+            <h5 class="navbar-brand mb-0">RAND REFINERY</h5>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container col-12 col-md-10 col-lg-12 mt-4 d-flex flex-column flex-md-row align-items-center justify-content-between brand_images text-center text-md-start">
+    <h2 class="my-3">Welcome back,
+        {% if user %}
+            {{ user.name }}
+        {% endif %}
+    </h2>
+    <img src="/static/images/freepik.png" width="150px" class="ms-md-auto mt-3 mt-md-0" />
 </div>
 
-{% block content %}
-<h2 class="text-center my-3">Welcome back, {{ user.name }}</h2>
 <div id="status" class="text-center p-2">
     <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
 </div>
+
 <div class="container">
-<div id="questions-container" style="display: none;">
-    <form id="checklist-form" class="p-4">
-        <div id="questions-wrapper"></div>
-        <button type="submit" class="btn btn-success mt-3">
-            <i class="fas fa-check-circle me-2"></i>Submit
-        </button>
-    </form>
-   
-</div>
-<a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm my-1">
-    <i class="fas fa-right-from-bracket me-2"></i>LOGOUT
-</a>
+    <div id="questions-container" style="display: none;">
+        <form id="checklist-form" class="p-4">
+            <div id="questions-wrapper"></div>
+            <button type="submit" class="btn btn-success mt-3">
+                <i class="fas fa-check-circle me-2"></i>Submit
+            </button>
+        </form>
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm my-1">
+        <i class="fas fa-right-from-bracket me-2"></i>LOGOUT
+    </a>
 </div>
 
 <script>
@@ -35,7 +50,7 @@
             questionsWrapper.innerHTML = '';
             questions.forEach((q, idx) => {
                 let html = `<div class="mb-3">
-                    <label class="form-label">${idx + 1}. ${q.question}</label>`;
+                    <label class="form-label" id="question_${q.id}">${idx + 1}. ${q.question}</label>`;
 
                 if (q.question_type === "text") {
                     html += `<input type="text" class="form-control" name="answers[${q.id}]" required>`;
@@ -50,6 +65,7 @@
                                 <label class="form-check-label">${option}</label>
                             </div>`;
                     });
+
                     if (q.reasoning) {
                         html += `<div class="reason-input mt-2" id="reason_${q.id}" style="display: none;">
                                     <input type="text" class="form-control" 
@@ -103,7 +119,6 @@
 
         getLocationAndCheck();
 
-        // Form submission
         const form = document.getElementById('checklist-form');
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -113,23 +128,32 @@
 
                 const formData = new FormData(form);
                 const answers = [];
+
                 for (let [key, val] of formData.entries()) {
                     if (key.startsWith("answers[")) {
                         const id = key.match(/\d+/)[0];
                         const reason = formData.get(`reasons[${id}]`) || null;
-                        const questionLabel = form.querySelector(`label[for="question_${id}"]`);
+                        const labelEl = document.getElementById(`question_${id}`);
+                        const questionText = labelEl ? labelEl.textContent.trim() : "Unknown question";
+
                         answers.push({
-                            question: questionLabel ? questionLabel.textContent.trim() : "Unknown question",
+                            question: questionText,
                             answer: val,
                             reason: reason
                         });
                     }
                 }
 
+                console.log("Submitting answers:", answers); // Optional debugging
+
                 fetch('/operator', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ latitude: lat, longitude: lon, answers_with_questions: answers })
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: lon,
+                        answers_with_questions: answers
+                    })
                 })
                 .then(res => res.json())
                 .then(data => {

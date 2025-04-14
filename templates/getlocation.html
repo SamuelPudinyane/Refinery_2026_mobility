@@ -1,31 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Location Tracker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #location {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            display: inline-block;
-        }
-        #map {
-            margin-top: 20px;
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}ADD ADMINISTRATORS{% endblock %}
+
+{% block content %}
+    
+<nav class="navbar p-2">
+    <div class="container">
+        <div class="d-flex align-items-center w-100">
+            <img src="/static/images/2.png" width="50px" class="me-2" />
+            <h5 class="navbar-brand mb-0">RAND REFINERY</h5>
+
+            <!-- Sidebar Toggle Button (only on small screens) -->
+            <button id="sidebarToggle" class="btn btn-outline-secondary d-lg-none ms-auto" type="button">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+
+            <!-- Desktop Menu (hidden on small screens) -->
+            <div class="d-none d-lg-flex gap-2 ms-auto">
+                <a href="{{ url_for('master_add') }}" class="btn btn-secondary btn-sm my-1">
+                    <i class="fas fa-user-plus me-2"></i>ASSIGN ADMINISTRATORS
+                </a>
+                <a href="{{ url_for('master_remove') }}" class="btn btn-sm my-1" data-bs-toggle="tooltip" title="Remove administrators">
+                    <i class="fas fa-user-minus me-2"></i>REMOVE ADMINISTRATORS
+                </a>
+                <a href="{{ url_for('master_view') }}" class="btn btn-sm my-1">
+                    <i class="fas fa-users me-2"></i>VIEW ADMINISTRATORS
+                </a>
+                <a href="{{ url_for('submit_location') }}" class="btn btn-sm my-1 ms-auto">
+                    <i class="fas fa-map-marker-alt me-2"></i>ADD LOCATION
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
+                    <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Sidebar Content (for small screens) -->
+<div class="sidebar-content p-3">
+    <ul class="list-unstyled">
+        <li><a href="{{ url_for('master_add') }}" class="btn btn-secondary btn-sm my-1">
+            <i class="fas fa-user-plus me-2"></i>ASSIGN ADMINISTRATORS
+        </a></li>
+        <li><a href="{{ url_for('master_remove') }}" class="btn btn-sm my-1" data-bs-toggle="tooltip" title="Remove administrators">
+            <i class="fas fa-user-minus me-2"></i>REMOVE ADMINISTRATORS
+        </a></li>
+        <li><a href="{{ url_for('master_view') }}" class="btn btn-sm my-1">
+            <i class="fas fa-users me-2"></i>VIEW ADMINISTRATORS
+        </a></li>
+        <li><a href="{{ url_for('submit_location') }}" class="btn btn-sm my-1 ms-auto">
+            <i class="fas fa-map-marker-alt me-2"></i>ADD LOCATION
+        </a></li>
+        <li><a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
+            <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
+        </a></li>
+    </ul>
+</div>
     <h1>Live Location Tracker</h1>
     <p>Your current location:</p>
     <div id="location">Fetching location...</div>
@@ -124,9 +155,36 @@
             // Geolocation is not supported by the browser
             document.getElementById('location').innerHTML = "Geolocation is not supported by your browser.";
         }
+        // Flash message timeout
+setTimeout(() => {
+    const flashMessage = document.getElementById("flash-message-container");
+    if (flashMessage) {
+        flashMessage.style.transition = "opacity 0.5s ease-out";
+        flashMessage.style.opacity = "0";
+        setTimeout(() => flashMessage.remove(), 500);
+    }
+}, 4000);
+
+// Sidebar toggle script
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar-content');
+
+    if (toggleButton && sidebar) {
+        toggleButton.addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent document click
+            sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!sidebar.contains(event.target) && event.target !== toggleButton) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+});
     </script>
 
     <!-- Load Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBa2EAetGrPvYyQx_3yXH2_avuVU-31Tsc"></script>
-</body>
-</html>
+    {% endblock %}

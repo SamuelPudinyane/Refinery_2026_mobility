@@ -1,27 +1,29 @@
 {% extends "base.html" %}
-
 {% block title %}Checklist Form{% endblock %}
-{% block sidebar %}
+
 <div class="align-items-center text-center py-3">
     <img src="/static/images/2.png" width="50px" class="me-2" />
     <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
 </div>
+
 <div class="align-items-center container-fluid add-admin text-center py-3">
-    
-<a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
-    <i class="fas fa-right-from-bracket "></i> LOGOUT
-</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
+        <i class="fas fa-right-from-bracket"></i> LOGOUT
+    </a>
 </div>
-{% endblock %}
+
 {% block content %}
 <div class="d-flex align-items-center brand_images">
     <h2 class="text-center my-3">Welcome back, 
-        {% if user%}
-        {{user.name}}
-        {% endif %}</h2>
+        {% if user %}
+        {{ user.name }}
+        {% endif %}
+    </h2>
     <img src="/static/images/freepik.png" width="200px" class="ms-auto" />
 </div>
+
 <h2 class="text-center">OPERATOR</h2>
+
 <div class="p-4">
     <div id="status">
         <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
@@ -38,145 +40,196 @@
             <div class="card myBlock">
                 <div class="container card card_add_admin">
                     <h1><i class="fas fa-clipboard-list me-2"></i>CHECKLIST</h1>
-                    {% if operators_questions | length > 0 %}
-                        {% for q in operators_questions %}
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    {{ loop.index }}. {{ q.question }}
-                                </label>
+                    
+                    {% for q in operators_questions %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ loop.index }}. {{ q.question }}</label>
 
-                                {% if q.question_type == "text" %}
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
-                                        <input type="text" class="form-control" 
-                                               name="answers[{{ q.id }}]" required>
-                                    </div>
-
-                                {% elif q.question_type == "radio" %}
-                                    {% for option in q.options[0] %}
-                                        <div class="form-check">
-                                            <input class="form-check-input" 
-                                                   type="radio" 
-                                                   name="answers[{{ q.id }}]" 
-                                                   value="{{ option }}" 
-                                                   id="radio_{{ q.id }}_{{ option }}" 
-                                                   data-reasoning="{{ q.reasoning }}"
-                                                   onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')" 
-                                                   required>
-                                            <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
-                                                {{ option }}
-                                            </label>
-                                        </div>
-                                    {% endfor %}
-
-                                    {% if q.reasoning %}
-                                        <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
-                                            <label class="form-label">
-                                                <i class="fas fa-comment-dots me-2"></i>Provide a reason:
-                                            </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
-                                                <input type="text" class="form-control" 
-                                                       name="reasons[{{ q.id }}]">
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                {% endif %}
+                        {% if q.question_type == "text" %}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                <input type="text" class="form-control" name="answers[{{ q.id }}]" required>
                             </div>
-                        {% endfor %}
-                        <button type="submit" class="btn btn-success btn-add-admin">
-                            <i class="fas fa-check-circle me-2"></i>Submit
-                        </button>
-                    {% else %}
-                        <p>No questions available.</p>
-                    {% endif %}
+
+                        {% elif q.question_type == "radio" %}
+                            {% for option in q.options[0] %}
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="answers[{{ q.id }}]"
+                                       value="{{ option }}"
+                                       id="radio_{{ q.id }}_{{ option }}"
+                                       data-reasoning="{{ q.reasoning }}"
+                                       onchange="toggleReasonInput('{{ q.id }}', '{{ option }}')"
+                                       required>
+                                <label class="form-check-label" for="radio_{{ q.id }}_{{ option }}">
+                                    {{ option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+
+                            {% if q.reasoning %}
+                            <div class="mt-2 reason-input" id="reason_{{ q.id }}" style="display: none;">
+                                <label class="form-label"><i class="fas fa-comment-dots me-2"></i>Provide a reason:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                    <input type="text" class="form-control" name="reasons[{{ q.id }}]">
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-success btn-add-admin">
+                        <i class="fas fa-check-circle me-2"></i>Submit
+                    </button>
+
                 </div>
-                
             </div>
         </form>
     </div>
 </div>
-
 <script>
-    let watchId;
-
-// Function to get user location once
-function getUserLocation(callback) {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-                sessionStorage.setItem('user_lat', userLat);
-                sessionStorage.setItem('user_lon', userLon);
-                console.log("userLat: " + userLat + " | userLon: " + userLon);
-                if (typeof callback === "function") callback();
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-                alert('Failed to get your location. Please allow location access and try again.');
-            },
-            { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
-        );
-    } else {
-        alert('Geolocation is not supported by this browser.');
-    }
-}
-
-// Toggle reason input field
-function toggleReasonInput(questionId, selectedOption) {
-    const reasonDiv = document.getElementById(`reason_${questionId}`);
-    const selectedRadio = document.querySelector(`input[name="answers[${questionId}]"]:checked`);
-    if (!selectedRadio || !reasonDiv) return;
-
-    const reasoning = selectedRadio.dataset.reasoning;
-
-    if ((reasoning === "yes" && selectedOption === "YES") || 
-        (reasoning === "no" && selectedOption === "NO")) {
-        reasonDiv.style.display = "block";
-    } else {
-        reasonDiv.style.display = "none";
-    }
-}
-
-// Form submission with location
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('checklist-form');
-
-    if (form) {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            getUserLocation(() => {
+    document.addEventListener('DOMContentLoaded', function () {
+        function getUserLocation(callback) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+                        sessionStorage.setItem('user_lat', userLat);
+                        sessionStorage.setItem('user_lon', userLon);
+                        callback(userLat, userLon);
+                    },
+                    (error) => {
+                        alert('Failed to get your location.');
+                    },
+                    { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+    
+        function renderQuestions(questions) {
+            const formContainer = document.getElementById('questions');
+            const checklistForm = document.getElementById('checklist-form');
+    
+            questions.forEach((q, index) => {
+                const qDiv = document.createElement('div');
+                qDiv.classList.add('mb-3');
+    
+                const label = document.createElement('label');
+                label.classList.add('form-label');
+                label.textContent = `${index + 1}. ${q.question}`;
+                qDiv.appendChild(label);
+    
+                if (q.question_type === "text") {
+                    const inputGroup = document.createElement('div');
+                    inputGroup.className = "input-group";
+                    inputGroup.innerHTML = `
+                        <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                        <input type="text" class="form-control" name="answers[${q.id}]" required>
+                    `;
+                    qDiv.appendChild(inputGroup);
+                } else if (q.question_type === "radio") {
+                    q.options[0].forEach(option => {
+                        const div = document.createElement('div');
+                        div.className = "form-check";
+                        div.innerHTML = `
+                            <input class="form-check-input" type="radio" name="answers[${q.id}]"
+                                value="${option}" id="radio_${q.id}_${option}" 
+                                data-reasoning="${q.reasoning}" 
+                                onchange="toggleReasonInput('${q.id}', '${option}')" required>
+                            <label class="form-check-label" for="radio_${q.id}_${option}">${option}</label>
+                        `;
+                        qDiv.appendChild(div);
+                    });
+    
+                    if (q.reasoning) {
+                        const reasonDiv = document.createElement('div');
+                        reasonDiv.className = "mt-2 reason-input";
+                        reasonDiv.id = `reason_${q.id}`;
+                        reasonDiv.style.display = "none";
+                        reasonDiv.innerHTML = `
+                            <label class="form-label"><i class="fas fa-comment-dots me-2"></i>Provide a reason:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                <input type="text" class="form-control" name="reasons[${q.id}]">
+                            </div>
+                        `;
+                        qDiv.appendChild(reasonDiv);
+                    }
+                }
+    
+                checklistForm.insertBefore(qDiv, checklistForm.lastElementChild); // insert above submit button
+            });
+    
+            formContainer.style.display = 'block';
+            document.getElementById('status').innerHTML = '✅ You are within the required location.';
+        }
+    
+        getUserLocation((lat, lon) => {
+            fetch('/operator', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ latitude: lat, longitude: lon })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' && data.is_within_range) {
+                    renderQuestions(data.operators_questions);
+                } else {
+                    document.getElementById('status').innerHTML = '❌ You are not in the required location.';
+                    alert("Access denied: not within the authorized location.");
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Something went wrong.");
+            });
+        });
+    
+        window.toggleReasonInput = function (questionId, selectedOption) {
+            const reasonDiv = document.getElementById(`reason_${questionId}`);
+            const selectedRadio = document.querySelector(`input[name="answers[${questionId}]"]:checked`);
+            if (!selectedRadio || !reasonDiv) return;
+    
+            const reasoning = selectedRadio.dataset.reasoning;
+            if ((reasoning === "yes" && selectedOption === "YES") || 
+                (reasoning === "no" && selectedOption === "NO")) {
+                reasonDiv.style.display = "block";
+            } else {
+                reasonDiv.style.display = "none";
+            }
+        };
+    
+        // Submit logic remains same
+        const form = document.getElementById('checklist-form');
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
                 const formData = new FormData(form);
                 const answersWithQuestions = [];
-
+    
                 for (const [key, value] of formData.entries()) {
                     if (key.startsWith("answers[")) {
                         const idMatch = key.match(/\d+/);
                         if (!idMatch) continue;
-
                         const id = idMatch[0];
-                        const questionLabelElement = document.querySelector(`label[for="question_${id}"]`);
-                        const questionLabel = questionLabelElement ? questionLabelElement.textContent.trim().replace(/^\d+\.\s*/, '') : "Unknown question";
                         const reason = formData.get(`reasons[${id}]`) || null;
-
                         answersWithQuestions.push({
-                            question: questionLabel,
+                            question: "Unknown question",
                             answer: value,
                             reason: reason ? reason.trim() : null
                         });
                     }
                 }
-
+    
                 const userLat = sessionStorage.getItem('user_lat');
                 const userLon = sessionStorage.getItem('user_lon');
-
-                if (!userLat || !userLon) {
-                    alert('Unable to retrieve your location. Please allow location access.');
-                    return;
-                }
-
+    
                 fetch('/operator', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -186,37 +239,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         answers_with_questions: answersWithQuestions
                     }),
                 })
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        if (data.is_within_range) {
-                            alert(data.message || 'Checklist submitted successfully!');
-                            window.location.reload();
-                        } else {
-                            alert('You are not within the required location range.');
-                        }
+                        alert(data.message || 'Checklist submitted successfully.');
+                        window.location.reload();
                     } else {
-                        alert(data.message || 'Error submitting checklist.');
+                        alert(data.message || 'Submission failed.');
                     }
                 })
-                .catch(error => {
-                    console.error('Submission error:', error);
-                    alert('An error occurred while submitting the checklist.');
+                .catch(err => {
+                    console.error("Submit error:", err);
+                    alert("Submission error.");
                 });
             });
-        });
-    }
-
-    // Run geolocation check when page loads
-    getUserLocation(() => {
-        const status = document.getElementById('status');
-        const questionsSection = document.getElementById('questions');
-        if (status && questionsSection) {
-            status.innerHTML = 'Your location has been captured.';
-            questionsSection.style.display = 'block';
         }
     });
-});
+    </script>
+    
 
-</script>
 {% endblock %}

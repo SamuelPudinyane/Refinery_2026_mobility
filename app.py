@@ -467,71 +467,56 @@ def all_answered_questions():
     print("answers --",results)
     return jsonify(results)  # Return all records as JSON
 
-
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
-    user = session.get('user')  # Get the user from the session
-   
+    user = session.get('user')
+    if not user:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        # Get the user's location and answers from the request
         user_data = request.json
         user_lat = user_data.get('latitude')
         user_lon = user_data.get('longitude')
-        user_answers = user_data.get('answers_with_questions', {})  # Get user answers
-        print("user ans ",user_answers)
-        # Store the user's location in the session
-        session['user_lat'] = user_lat
-        session['user_lon'] = user_lon
+        user_answers = user_data.get('answers_with_questions', None)
 
-        # Get the target location and range
         questions = get_all_questions_by_company_number(user['company_number'])
-        print("data ",questions)
-        if questions and len(questions) > 0:
-            location = json.loads(questions[0]['location'])
-            target_location = location[0]
-            print("loca -- ",target_location)
-            # Check if the user is within range
-            is_within = is_within_range(
-                str(user_lat), str(user_lon),
-                target_location['latitude'], target_location['longitude'],
-                target_location['range']
-            )
-            print("is within ",is_within)
-            # Prepare the response
-            response_data = {
-                'status': 'success',
-                'is_within_range': is_within,
-                'user_answers': [],  # Initialize an empty list for mapped answers
-            }
-            checklist_id = questions[0]['id']
-            print("cklst", questions, " my_id ", checklist_id)
+        if not questions:
+            return jsonify({'status': 'error', 'message': 'No checklist questions found'})
 
-            # Include operators_questions in the response if within range
+        location = json.loads(questions[0]['location'])[0]
+        is_within = is_within_range(
+            str(user_lat), str(user_lon),
+            location['latitude'], location['longitude'],
+            location['range']
+        )
+
+        response_data = {
+            'status': 'success',
+            'is_within_range': is_within,
+        }
+
+        checklist_id = questions[0]['id']
+
+        if user_answers is not None:
+            # Submitting answers
             if is_within:
-                print("im here on the location -- ", is_within)
-                # Store the answers in the database
-                if user_answers:
-                    output = store_answers(checklist_id, user_answers)
-                    print("user_answers --",output)
-                    if output:
-                        response_data['message'] = 'Checklist submitted successfully'
-                        
-                    else:
-                        response_data['status'] = 'error'
-                        response_data['message'] = 'Error submitting checklist'
+                output = store_answers(checklist_id, user_answers)
+                if output:
+                    response_data['message'] = 'Checklist submitted successfully'
                 else:
-                    flash("No answers provided.")
+                    response_data['status'] = 'error'
+                    response_data['message'] = 'Error submitting checklist'
+            else:
+                response_data['message'] = 'User not within the required location'
+        else:
+            # Just checking location - return questions if allowed
+            if is_within:
+                response_data['operators_questions'] = json.loads(questions[0]['checklist_questions'])
 
-            # Return the result as JSON
-            return jsonify(response_data)
-    # For GET requests, render the template
-    
-    operators_questions=[]
-    if questions:
-        operators_questions = json.loads(questions[0]['checklist_questions'])
+        return jsonify(response_data)
 
-    return render_template('operator.html', operators_questions=operators_questions,user=user)
-
+    # GET request just renders page
+    return render_template('operator.html', operators_questions=[], user=user)
 
 
 

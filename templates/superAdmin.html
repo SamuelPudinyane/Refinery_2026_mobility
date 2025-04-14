@@ -150,7 +150,10 @@
             </tbody>
         </table>
     </div>
+    <br>
+    <hr>
 <div>
+    <h4>Assignments</h4>
     <table class="list-unstyled table table-striped">
         <thead>
             <tr>
@@ -183,6 +186,43 @@
             {% endif %}
         </tbody>
     </table>
+    <br>
+    <hr>
+    <div class="table-responsive">
+        <h4>Checklists</h4>
+        <table class="table table-bordered table-striped mt-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Checklist Questions</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if count %}
+                    {% for item in count %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                {% for questions in item.checklist_questions %}
+                                    <div class="mb-2">
+                                        <p class="mb-1"><strong>Question:</strong> {{ questions.question }}</p>
+                                        <p class="mb-0"><strong>Type:</strong> {{ questions.question_type }}</p>
+                                    </div>
+                                    {% if not loop.last %}<hr class="my-1">{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('delete_checklist', id=item.id) }}" class="btn btn-dark btn-sm">
+                                    <i class="fas fa-user-minus me-1"></i>DELETE
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

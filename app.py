@@ -24,6 +24,8 @@ app = Flask(__name__)
 
 app.secret_key="session"
 print(os.getenv("DATABASE_URL"))
+
+
 @app.route("/")
 @app.route('/login',methods=['GET','POST'])
 def login():
@@ -427,11 +429,11 @@ def admin_view_unanswered_questions():
     
     return render_template("admin_view_unanswered_questions.html")
 
-@app.route('/api/answered_questions/<plant_section>', methods=['GET'])
+@app.route('/api/filtered_answered_questions/<plant_section>', methods=['GET'])
 def get_answered_questions(plant_section):
 
-    if is_logged_out():
-        return redirect(url_for('login'))
+    # if is_logged_out():
+    #     return redirect(url_for('login'))
 
     plant_section = plant_section.upper().strip()  # Get plant_section from query parameters
     print("section ",plant_section)
@@ -439,15 +441,37 @@ def get_answered_questions(plant_section):
         return jsonify({"error": "plant_section parameter is required"}), 400
 
     results=get_all_answered_questions_by_plant_section(plant_section)
+    for items in results:
+        location=json.loads(items['location'])
+        checklist_answers=json.loads(items['checklist_answers'])
+        print(type(items['location']))
+        items['location']=location
+        items['checklist_answers']=checklist_answers
     print(results)
+    return jsonify(results)  # Return all records as JSON
+
+
+@app.route('/api/all_answered_questions', methods=['GET'])
+def all_answered_questions():
+
+    # if is_logged_out():
+    #     return redirect(url_for('login'))
+
+    results=get_all_answered_questions()
+    for items in results:
+        location=json.loads(items['location'])
+        checklist_answers=json.loads(items['checklist_answers'])
+        print(type(items['location']))
+        items['location']=location
+        items['checklist_answers']=checklist_answers
+    print("answers --",results)
     return jsonify(results)  # Return all records as JSON
 
 
 @app.route('/operator', methods=["GET", "POST"])
 def operator():
     user = session.get('user')  # Get the user from the session
-    something = get_all_answered_questions()
-    print("something ", something)
+   
     if request.method == 'POST':
         # Get the user's location and answers from the request
         user_data = request.json
@@ -566,7 +590,7 @@ def register():
     admins=get_all_administrators()
     administrator=get_all_administrators_on_all_sections()
     users=get_all_users()
-
+    count=get_count_of_question()
     for items in administrator:
         items['company_number']=items['admin'].split("-")[0]
         items['username']=items['admin'].split("-")[1]
@@ -582,7 +606,14 @@ def register():
             insert_registerd_user(company_number.upper(), password.strip(), role,username.upper().strip())
             flash("User registered successfully")
             redirect(url_for("register"))
-    return render_template('superAdmin.html',users=users,user=user,admins=admins,administrator=administrator)
+    if count:
+        for item in count:
+            print("item ",type(json.loads(item['checklist_questions'])))
+            item['checklist_questions']=json.loads(item['checklist_questions'])
+    return render_template('superAdmin.html',count=count,users=users,user=user,admins=admins,administrator=administrator)
+
+
+
 
 @app.route('/delete_assigned_section/<id>',methods=['GET','POST'])
 def delete_assigned_section(id):

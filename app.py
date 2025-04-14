@@ -384,7 +384,7 @@ def admin_create_checklist():
 def delete_checklist(id):
     delete_checklist_questions(id)
     flash("checklist deleted succeesfully")
-    return redirect(url_for("admin_create_checklist"))
+    return redirect(url_for("register"))
 
 @app.route('/admin_view_answers', methods=['GET', 'POST'])
 def admin_view_answers():
@@ -486,7 +486,7 @@ def operator():
         # Get the target location and range
         questions_data = get_all_questions_by_company_number(user['company_number'])
         print("data ",questions_data)
-        if questions_data:
+        if questions_data and len(questions_data) > 0:
             location = json.loads(questions_data[0]['location'])
             target_location = location[0]
             print("loca -- ",target_location)

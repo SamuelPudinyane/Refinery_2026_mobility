@@ -108,26 +108,28 @@ function getUserLocation(callback) {
                 const userLon = position.coords.longitude;
                 sessionStorage.setItem('user_lat', userLat);
                 sessionStorage.setItem('user_lon', userLon);
-                callback();
+                console.log("userLat: " + userLat + " | userLon: " + userLon);
+                if (typeof callback === "function") callback();
             },
             (error) => {
                 console.error('Error getting location:', error);
-                alert('Failed to get your location. Please try again.');
+                alert('Failed to get your location. Please allow location access and try again.');
             },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
         );
     } else {
         alert('Geolocation is not supported by this browser.');
     }
 }
 
-// Function to toggle reason input visibility
+// Toggle reason input field
 function toggleReasonInput(questionId, selectedOption) {
     const reasonDiv = document.getElementById(`reason_${questionId}`);
     const selectedRadio = document.querySelector(`input[name="answers[${questionId}]"]:checked`);
-    if (!selectedRadio) return;
+    if (!selectedRadio || !reasonDiv) return;
 
     const reasoning = selectedRadio.dataset.reasoning;
+
     if ((reasoning === "yes" && selectedOption === "YES") || 
         (reasoning === "no" && selectedOption === "NO")) {
         reasonDiv.style.display = "block";
@@ -136,72 +138,84 @@ function toggleReasonInput(questionId, selectedOption) {
     }
 }
 
-// Form submission with geolocation
-document.getElementById('checklist-form').addEventListener('submit', function (event) {
-    event.preventDefault(); 
+// Form submission with location
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('checklist-form');
 
-    getUserLocation(() => {
-        const formData = new FormData(this);
-        const answersWithQuestions = [];
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
 
-        // Loop through form data to collect answers and reasoning
-        for (const [key, value] of formData.entries()) {
-            if (key.startsWith("answers[")) {
-                const id = key.match(/\d+/)[0]; // Extract question ID
-                const questionElement = document.querySelector(`input[name="${key}"]`).closest('.mb-3').querySelector('label');
-                const questionLabel = questionElement ? questionElement.textContent.trim().replace(/^\d+\.\s*/, '') : "Unknown question";const answer = value;
-                const reason = formData.get(`reasons[${id}]`) || null; // Get the reason, if available
+            getUserLocation(() => {
+                const formData = new FormData(form);
+                const answersWithQuestions = [];
 
-                // Add question, answer, and reason to the array
-                answersWithQuestions.push({
-                    question: questionLabel.trim(),
-                    answer: answer,
-                    reason: reason ? reason.trim() : null
-                });
-                console.log("ans ",answersWithQuestions)
-            }
-        }
+                for (const [key, value] of formData.entries()) {
+                    if (key.startsWith("answers[")) {
+                        const idMatch = key.match(/\d+/);
+                        if (!idMatch) continue;
 
-        const userLat = sessionStorage.getItem('user_lat');
-        const userLon = sessionStorage.getItem('user_lon');
-        
-        // Final submission to server
-        fetch('/operator', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                latitude: userLat,
-                longitude: userLon,
-                answers_with_questions: answersWithQuestions, // Send answers with corresponding questions
-            }),
-        })
-        .then((response) => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                if (data.is_within_range) {
-                    alert(data.message || 'Checklist submitted successfully!');
-                    window.location.reload();  // Refresh to show new state
-                } else {
-                    alert('You are not within the required range!');
+                        const id = idMatch[0];
+                        const questionLabelElement = document.querySelector(`label[for="question_${id}"]`);
+                        const questionLabel = questionLabelElement ? questionLabelElement.textContent.trim().replace(/^\d+\.\s*/, '') : "Unknown question";
+                        const reason = formData.get(`reasons[${id}]`) || null;
+
+                        answersWithQuestions.push({
+                            question: questionLabel,
+                            answer: value,
+                            reason: reason ? reason.trim() : null
+                        });
+                    }
                 }
-            } else {
-                alert(data.message || 'Error submitting checklist');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to submit checklist.');
+
+                const userLat = sessionStorage.getItem('user_lat');
+                const userLon = sessionStorage.getItem('user_lon');
+
+                if (!userLat || !userLon) {
+                    alert('Unable to retrieve your location. Please allow location access.');
+                    return;
+                }
+
+                fetch('/operator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        latitude: userLat,
+                        longitude: userLon,
+                        answers_with_questions: answersWithQuestions
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.is_within_range) {
+                            alert(data.message || 'Checklist submitted successfully!');
+                            window.location.reload();
+                        } else {
+                            alert('You are not within the required location range.');
+                        }
+                    } else {
+                        alert(data.message || 'Error submitting checklist.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Submission error:', error);
+                    alert('An error occurred while submitting the checklist.');
+                });
+            });
         });
+    }
+
+    // Run geolocation check when page loads
+    getUserLocation(() => {
+        const status = document.getElementById('status');
+        const questionsSection = document.getElementById('questions');
+        if (status && questionsSection) {
+            status.innerHTML = 'Your location has been captured.';
+            questionsSection.style.display = 'block';
+        }
     });
 });
-
-// Show questions once geolocation is successful
-window.onload = function() {
-    getUserLocation(() => {
-        document.getElementById('status').innerHTML = 'You are within range!';
-        document.getElementById('questions').style.display = 'block';
-    });
-};
 
 </script>
 {% endblock %}

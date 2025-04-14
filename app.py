@@ -482,42 +482,36 @@ def operator():
         questions = get_all_questions_by_company_number(user['company_number'])
         if not questions:
             return jsonify({'status': 'error', 'message': 'No checklist questions found'})
-
+        print("questions ", questions)
         location = json.loads(questions[0]['location'])[0]
         is_within = is_within_range(
             str(user_lat), str(user_lon),
             location['latitude'], location['longitude'],
             location['range']
         )
-
+        print("is within ",is_within)
         response_data = {
             'status': 'success',
             'is_within_range': is_within,
         }
-
+        print("response data ",response_data)
         checklist_id = questions[0]['id']
 
         if user_answers is not None:
-            # Submitting answers
             if is_within:
                 output = store_answers(checklist_id, user_answers)
-                if output:
-                    response_data['message'] = 'Checklist submitted successfully'
-                else:
-                    response_data['status'] = 'error'
-                    response_data['message'] = 'Error submitting checklist'
+                response_data['message'] = 'Checklist submitted successfully' if output else 'Error submitting checklist'
+                response_data['status'] = 'success' if output else 'error'
             else:
                 response_data['message'] = 'User not within the required location'
         else:
-            # Just checking location - return questions if allowed
             if is_within:
                 response_data['operators_questions'] = json.loads(questions[0]['checklist_questions'])
 
         return jsonify(response_data)
 
-    # GET request just renders page
+    # Initial page load
     return render_template('operator.html', operators_questions=[], user=user)
-
 
 
 @app.route("/submit_location", methods=["GET","POST"])

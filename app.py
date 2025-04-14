@@ -472,14 +472,14 @@ def operator():
     user = session.get('user')
     if not user:
         return redirect(url_for('login'))
-
+    questions = get_all_questions_by_company_number(user['company_number'])
     if request.method == 'POST':
         user_data = request.json
         user_lat = user_data.get('latitude')
         user_lon = user_data.get('longitude')
         user_answers = user_data.get('answers_with_questions', None)
 
-        questions = get_all_questions_by_company_number(user['company_number'])
+        
         if not questions:
             return jsonify({'status': 'error', 'message': 'No checklist questions found'})
         print("questions ", questions)
@@ -489,7 +489,6 @@ def operator():
             location['latitude'], location['longitude'],
             location['range']
         )
-        print("is within ",is_within)
         response_data = {
             'status': 'success',
             'is_within_range': is_within,
@@ -507,6 +506,7 @@ def operator():
         else:
             if is_within:
                 response_data['operators_questions'] = json.loads(questions[0]['checklist_questions'])
+        print("FINAL RESPONSE:", response_data)
 
         return jsonify(response_data)
 

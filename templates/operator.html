@@ -10,17 +10,19 @@
 <div id="status" class="text-center p-2">
     <i class="fas fa-map-marker-alt me-2"></i>Checking your location...
 </div>
-
-<div id="questions-container container" style="display: none;">
+<div class="container">
+<div id="questions-container" style="display: none;">
     <form id="checklist-form" class="p-4">
         <div id="questions-wrapper"></div>
         <button type="submit" class="btn btn-success mt-3">
             <i class="fas fa-check-circle me-2"></i>Submit
         </button>
     </form>
-    <a href="{{ url_for('logout') }}" class="btn btn-sm my-1">
-        <i class="fas fa-right-from-bracket me-2"></i>LOGOUT
-    </a>
+   
+</div>
+<a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm my-1">
+    <i class="fas fa-right-from-bracket me-2"></i>LOGOUT
+</a>
 </div>
 
 <script>

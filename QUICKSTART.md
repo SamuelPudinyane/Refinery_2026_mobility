@@ -2,9 +2,44 @@
 
 Get the Mobility App running in 5 minutes!
 
-## 1. Prerequisites Check
+## Choose Your Setup Method
 
-Make sure you have:
+### 🐳 Method 1: Docker (Recommended - Easiest!)
+
+**Perfect for:** Everyone, especially if you want zero setup hassle.
+
+```bash
+# 1. Clone repository
+git clone https://github.com/IDBRSsimulator/Mobility_for-rand_refinery.git
+cd mobility_app
+
+# 2. Configure environment
+cp .env.docker .env
+# Edit .env: Change DB_PASSWORD and SECRET_KEY
+
+# 3. Start everything
+docker-compose up -d
+
+# 4. Access app at http://localhost:8000
+```
+
+**That's it!** Docker handles everything: Python, PostgreSQL, dependencies, migrations.
+
+**Useful Docker commands:**
+```bash
+docker-compose logs -f          # View logs
+docker-compose down            # Stop
+docker-compose restart         # Restart
+docker-compose exec web bash   # Access container shell
+```
+
+---
+
+### 💻 Method 2: Traditional Setup (Manual)
+
+**Perfect for:** Developers who want full control or can't use Docker.
+
+### 1. Prerequisites Check
 - ✅ Python 3.11+ installed
 - ✅ PostgreSQL installed and running
 - ✅ Git installed
@@ -36,7 +71,7 @@ source myvenv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 3. Database Setup
+### 3. Database Setup
 
 ```bash
 # Create PostgreSQL database
@@ -45,7 +80,7 @@ CREATE DATABASE rand_refinary;
 \q
 ```
 
-## 4. Configure Environment
+### 4. Configure Environment
 
 Copy the example environment file and edit it:
 
@@ -70,7 +105,7 @@ DB_PORT=5432
 SECRET_KEY=change_this_to_something_random_and_secure
 ```
 
-## 5. Initialize Database
+### 5. Initialize Database
 
 ```bash
 # Run migrations to create tables
@@ -85,7 +120,7 @@ flask db migrate -m "Initial migration"
 flask db upgrade
 ```
 
-## 6. Run the Application
+### 6. Run the Application
 
 ```bash
 # Start the development server
@@ -94,7 +129,9 @@ python app.py
 
 The app should now be running at: **http://127.0.0.1:5000**
 
-## 7. Access the Application
+---
+
+## Access the Application
 
 Open your browser and go to:
 ```

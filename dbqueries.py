@@ -4,51 +4,59 @@ from encryption import (hash_password)
 from psycopg2 import sql
 import json
 import os
+from dotenv import load_dotenv
 
-
-""" 
-{
-  "previewLimit": 50,
-  "server": "localhost",
-  "port": 5432,
-  "driver": "PostgreSQL",
-  "name": "rand_refinary",
-  "database": "rand_refinary",
-  "username": "postgres",
-  "password": "Admin"
-} 
-
-"""
-
-# def get_db_connection():
-#     try:
-#         # Use environment variables for connection parameters
-#         conn = psycopg2.connect(
-#             dbname="rand_refinary", 
-#             user="postgres",  
-#             password="Admin",  
-#             host="localhost", 
-#             port=5432 
-#         )
-#         return conn
-#     except Exception as e:
-#         print(f"Error connecting to PostgreSQL database: {e}")
-#         return None
+# Load environment variables
+load_dotenv()
 
 
 def get_db_connection():
+    """
+    Establishes a connection to the PostgreSQL database using environment variables.
+    
+    Configuration Priority:
+    1. DATABASE_URL environment variable (for cloud deployments)
+    2. Individual DB_* environment variables
+    3. Default localhost values
+    
+    Returns:
+        psycopg2.connection: Database connection object or None if connection fails
+    """
     try:
+        # Check if DATABASE_URL is provided (common in cloud deployments)
+        database_url = os.getenv("DATABASE_URL")
+        
+        if database_url:
+            # Parse DATABASE_URL and connect
+            # Handle Heroku postgres:// to postgresql:// conversion
+            if database_url.startswith('postgres://'):
+                database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            
+            conn = psycopg2.connect(database_url)
+            print("✓ Database Connection Successful (using DATABASE_URL)!")
+            return conn
+        
+        # Otherwise, use individual environment variables
         conn = psycopg2.connect(
-            dbname=os.getenv("DB_NAME", "randrefinerydb_hdcz"),  
-            user=os.getenv("DB_USER", "randrefinerydb_hdcz_user"),    
-            password=os.getenv("DB_PASSWORD", "NJY9sBdbbw3Sipd0gFGhHFjlLoiWnaaD"),  
-            host=os.getenv("DB_HOST", "dpg-cudl8flumphs73cpbcj0-a"),  
-            port=os.getenv("DB_PORT", "5432")  
+            dbname=os.getenv("DB_NAME", "rand_refinary"),
+            user=os.getenv("DB_USER", "postgres"),
+            password=os.getenv("DB_PASSWORD", ""),
+            host=os.getenv("DB_HOST", "localhost"),
+            port=os.getenv("DB_PORT", "5432")
         )
-        print("Database Connection Successful!")
+        print("✓ Database Connection Successful!")
         return conn
+        
+    except psycopg2.OperationalError as e:
+        print(f"✗ Database Connection Error: {e}")
+        print("\nPlease check:")
+        print("  1. PostgreSQL is running")
+        print("  2. Database credentials in .env file")
+        print("  3. Database 'rand_refinary' exists")
+        print("  4. Firewall allows port 5432")
+        return None
     except Exception as e:
-        print(f"Database Connection Error: {e}")
+        print(f"✗ Unexpected Database Error: {e}")
         return None
 
 

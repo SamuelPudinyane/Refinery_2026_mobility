@@ -13,17 +13,33 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
+from config import get_config
 
+# Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
+
+# Initialize Flask app
 app = Flask(__name__)
 
-# app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL","postgresql://mobility_app_user:6gYNmrAofVijLNkB9RZOJbAhNE64vw4U@dpg-cv79pjjtq21c73anf3ug-a.frankfurt-postgres.render.com/mobility_app")#get_db_connection()#
+# Load configuration from config.py based on environment
+config_obj = get_config()
+app.config.from_object(config_obj)
+
+# Set secret key from environment or config
+app.secret_key = os.getenv("SECRET_KEY", config_obj.SECRET_KEY)
+
+# Optional: SQLAlchemy setup (uncomment if using SQLAlchemy ORM)
+# app.config["SQLALCHEMY_DATABASE_URI"] = config_obj.get_database_url()
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
-app.secret_key="session"
-print(os.getenv("DATABASE_URL"))
+# Print database connection info for debugging (remove in production)
+if app.config['DEBUG']:
+    print(f"Environment: {os.getenv('FLASK_ENV', 'development')}")
+    print(f"Database: {config_obj.DB_NAME}")
+    print(f"Host: {config_obj.DB_HOST}:{config_obj.DB_PORT}")
 
 
 @app.route("/")

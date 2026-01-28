@@ -109,26 +109,32 @@
     /* Role hierarchy styles from superAdmin.html */
     .role-hierarchy-tree, .role-tree {
         padding: 15px;
+        min-width: 600px;
+        max-width: 1000px;
+        width: 100%;
     }
     
     .role-node {
-        margin: 10px 0;
-        padding: 12px;
+        margin: 16px 0;
+        padding: 18px;
         border-left: 4px solid #797206;
         background: #f4f6f6;
-        border-radius: 5px;
+        border-radius: 7px;
         transition: all 0.3s ease;
+        min-width: 400px;
+        max-width: 900px;
+        width: 95%;
     }
     .role-node:hover {
         background: #e8f1f2;
         border-left-color: #223D3C;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.10);
     }
     
     .role-node-children {
-        margin-left: 25px;
-        margin-top: 10px;
-        padding-left: 15px;
+        margin-left: 40px;
+        margin-top: 18px;
+        padding-left: 25px;
         border-left: 2px dashed #dee2e6;
     }
     

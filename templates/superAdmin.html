@@ -1,3 +1,41 @@
+{% macro render_role_node(role, all_roles) %}
+<div class="role-node">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span class="role-level-badge">Level {{ role.level }}</span>
+            <span class="role-name ms-2">{{ role.display_name }}</span>
+            {% if role.is_system_role %}
+                <span class="role-system-badge ms-2">SYSTEM</span>
+            {% endif %}
+            {% if not role.is_active %}
+                <span class="role-inactive-badge ms-2">INACTIVE</span>
+            {% endif %}
+        </div>
+        <div>
+            <span class="role-users-count">
+                <i class="fas fa-users"></i> 
+                {{ all_roles | selectattr('id', 'equalto', role.id) | map(attribute='user_count') | first | default(0) }} users
+            </span>
+        </div>
+    </div>
+    {% if role.description %}
+        <small class="text-muted d-block mt-1">{{ role.description }}</small>
+    {% endif %}
+    
+    <!-- Render child roles -->
+    {% set has_children = all_roles | selectattr('parent_role_id', 'equalto', role.id) | list | length > 0 %}
+    {% if has_children %}
+        <div class="role-node-children">
+            {% for child in all_roles %}
+                {% if child.parent_role_id == role.id %}
+                    {{ render_role_node(child, all_roles) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,48 +47,163 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/styles.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid d-flex align-items-center">
-            <!-- Logo and Brand -->
-            <div class="d-flex align-items-center">
-                <img src="/static/images/2.png" width="50px" class="me-2" />
-                <h5 class="navbar-brand" href="#">RAND REFINERY</h5>
-            </div>
-    
-            <!-- ADD LOCATION Button (pushed to the right) -->
-            <!--<a href="{{ url_for('submit_location') }}" class="btn btn-success btn-sm my-1 ms-auto">
-                <i class="fas fa-map-marker-alt me-2"></i>ADD LOCATION
-            </a>-->
-            <a href="{{ url_for('logout') }}" class="btn btn-sm my-1 ms-auto">
-                <i class="fas fa-right-from-bracket me-2"></i> LOGOUT
-            </a>
+<style>
+    body {
+        overflow-x: hidden;
+    }
+    #sidebar {
+        min-height: 100vh;
+        background: #212529;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    #sidebar .nav-link {
+        color: #e0e0e0;
+        padding: 15px 20px;
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    #sidebar .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        border-left-color: #198754;
+        color: #fff;
+    }
+    #sidebar .nav-link.active {
+        background: rgba(255,255,255,0.15);
+        border-left-color: #0d6efd;
+        color: #fff;
+    }
+    #sidebar .nav-link i {
+        width: 25px;
+        margin-right: 10px;
+    }
+    .sidebar-header {
+        padding: 20px;
+        background: rgba(0,0,0,0.2);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-header img {
+        filter: brightness(1.2);
+    }
+    .sidebar-toggle {
+        display: none;
+    }
+    @media (max-width: 768px) {
+        #sidebar {
+            position: fixed;
+            left: -250px;
+            width: 250px;
+            z-index: 1000;
+            transition: left 0.3s ease;
+        }
+        #sidebar.show {
+            left: 0;
+        }
+        .sidebar-toggle {
+            display: inline-block;
+        }
+        #content {
+            margin-left: 0 !important;
+        }
+    }
+    .content-header {
+        background: linear-gradient(to right, #2e3939, #223D3C);
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-left: 8px solid #797206;
+    }
+</style>
+
+
+<!-- Top Navbar (Mobile Toggle) -->
+<nav class="navbar p-2" style="background:linear-gradient(to right, #2e3939, #223D3C);">
+    <div class="container">
+        <div class="d-flex align-items-center w-100">
+            <img src="/static/images/2.png" width="50px" class="me-2" />
+            <h5 class="navbar-brand mb-0" style="color:#797206;">RAND REFINERY</h5>
+            <!-- Sidebar Toggle Button (only on small screens) -->
+            <button id="sidebarToggle" class="btn btn-outline-secondary d-lg-none ms-auto" type="button">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block" style="background:linear-gradient(to bottom, #2e3939, #223D3C);">
+        <div class="sidebar-header text-center">
+            <img src="/static/images/2.png" width="60px" class="mb-2" />
+            <h6 class="mb-0" style="color:#797206;">RAND REFINERY</h6>
+            <small class="text-muted">Super Admin Panel</small>
+        </div>
+        <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" style="color:#fff;" href="{{ url_for('register') }}">
+                        <i class="fas fa-tachometer-alt"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:#fff;" href="{{ url_for('manage_roles') }}">
+                        <i class="fas fa-user-shield"></i>Manage Roles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:#fff;" href="{{ url_for('manage_users') }}">
+                        <i class="fas fa-users"></i>Manage Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" style="color:#fff;" href="{{ url_for('submit_location') }}">
+                        <i class="fas fa-map-marker-alt"></i>Add Location
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                        <i class="fas fa-right-from-bracket"></i>Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
-     <div class="d-flex align-items-center brand_images">
-            <h2 class="text-center my-3">Welcome back, 
-                {% if user%}
-                {{user.name}}
-                {% endif %}</h2>
-            <img src="/static/images/freepik.png" width="200px" class="ms-auto" />
+
+    <!-- Main Content -->
+    <main id="content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="content-header">
+            <h2 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Super Admin Dashboard</h2>
+            <p class="mb-0 mt-2">Welcome back, 
+                {% if user %}
+                    {{user.name}}
+                {% endif %}
+            </p>
         </div>
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-       
-        <div class="card p-4 register-card">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                
-                <div id="flash-message-container">
-                    {% for category, message in messages %}
-                      <div class="alert alert-{{ category }}" role="alert">
-                        {{ message }}
-                      </div>
-                    {% endfor %}
-                  </div>
-               
-            {% endif %}
-        {% endwith %}
-            <h2 class="text-center mb-4">Register</h2>
-            <form action="/register" method="POST">
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Registration Form Column -->
+            <div class="col-lg-5 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+                        <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Register New User</h4>
+                    </div>
+                    <div class="card-body">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div id="flash-message-container">
+                                {% for category, message in messages %}
+                                  <div class="alert alert-{{ category }}" role="alert">
+                                    {{ message }}
+                                  </div>
+                                {% endfor %}
+                              </div>
+                        {% endif %}
+                        {% endwith %}
+                        
+                        <form action="/register" method="POST">
                 <!-- Username Field with Icon -->
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
@@ -93,104 +246,174 @@
                         </span>
                         <select id="role" name="role" class="form-select" required>
                             <option value="">-- Select Role --</option>
-                            <option value="master_administrator">Master Administrator</option>
-                            <option value="administrator">Administrator</option>
-                            <option value="operator">Operator</option>
-                            <hr>
-                            <option value="superadmin" class="bg-green">Super Admin</option>
+                            {% if available_roles %}
+                                {% for role in available_roles %}
+                                    <option value="{{ role.name }}">
+                                        {{ role.display_name }}
+                                        {% if role.is_system_role %}
+                                            (System)
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>No roles available - Please contact administrator</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
 
                 <!-- Register Button with Icon -->
-                <button type="submit" class="btn btn-success w-100">
+                <button type="submit" class="btn btn-success w-100 mb-2">
                     <i class="fas fa-user-plus me-2"></i>Register
                 </button>
-               
+                
+                <a href="{{url_for('login')}}" class="btn btn-outline-success w-100">
+                    <i class="fas fa-sign-in-alt me-2"></i>Go to Login
+                </a>
             </form>
-            <br>
-            <br>
-            <a href="{{url_for('login')}}"><i class="btn btn-success w-100 fas fa-sign-in-alt me-2"> Login</i> </a>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Role Hierarchy Column -->
+            <div class="col-lg-7 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+                        <h5 class="mb-0"><i class="fas fa-sitemap me-2"></i>Role Hierarchy</h5>
+                        <a href="{{ url_for('manage_roles') }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-cog me-1"></i>Manage Roles
+                        </a>
+                    </div>
+                    <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                        {% if available_roles %}
+                            <div class="role-hierarchy-tree">
+                                {% for role in available_roles %}
+                                    {% if not role.parent_role_id %}
+                                        {{ render_role_node(role, available_roles) }}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">No roles configured</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div>
-        <table class="list-unstyled table table-striped">
-            <thead>
-                <tr>
-                    
-                    <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
-                    <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
-                    <th><i class="fas fa-industry me-2"></i>ROLE</th>
-                    <th>ACTION</th>
-                </tr>
-            </thead>
-            <tbody>
+    
+    <!-- Registered Users Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Registered Users</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
+                                    <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
+                                    <th><i class="fas fa-user-tag me-2"></i>ROLE</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 {% if users %}
                     {% for item in users %}
                         <tr>
-                            
                             <td>{{ item.company_number | upper }}</td>
                             <td>{{ item.name | upper }}</td>
                             <td>{{ item.role | upper }}</td>
                             <td>
-                                <a class="btn btn-danger" href="{{url_for('delete_user',id=item.id)}}" 
+                                <a class="btn btn-danger btn-sm" href="{{url_for('delete_user',id=item.id)}}" 
                                 onclick="return confirmDelete();">
-                                <i class="fas fa-trash-alt me-2"></i>Delete
-                            </a>
-                        </td>
+                                    <i class="fas fa-trash-alt me-1"></i>Delete
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="text-center">
-                            <i class="fas fa-exclamation-circle me-2"></i>There are no Administrators registered.
+                        <td colspan="4" class="text-center">
+                            <i class="fas fa-exclamation-circle me-2"></i>There are no users registered.
                         </td>
                     </tr>
                 {% endif %}
-            </tbody>
-        </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <br>
-    <hr>
-<div>
-    <h4>Assignments</h4>
-    <table class="list-unstyled table table-striped">
-        <thead>
-            <tr>
-                <th><i class="fas fa-industry me-2"></i>PLANT SECTION</th>
-                <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
-                <th><i class="fas fa-user me-2"></i>FULL NAMES</th>
-                <th>ACTION</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if administrator %}
-                {% for item in administrator %}
+
+    <!-- Department Assignments Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+                    <h5 class="mb-0"><i class="fas fa-sitemap me-2"></i>Department Assignments</h5>
+                </div>
+                <div class="card-body">
+    {% if administrator and administrator|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
                     <tr>
-                        <td>{{ item.plant_section | upper }}</td>
-                        <td>{{ item.company_number | upper }}</td>
-                        <td>{{ item.username | upper }}</td>
+                        <th><i class="fas fa-building me-2"></i>DEPARTMENT</th>
+                        <th><i class="fas fa-id-card me-2"></i>COMPANY NUMBER</th>
+                        <th><i class="fas fa-user me-2"></i>FULL NAME</th>
+                        <th><i class="fas fa-user-tag me-2"></i>ROLE</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user_item, dept_item in administrator %}
+                    <tr>
+                        <td>{{ dept_item.name | upper }}</td>
+                        <td>{{ user_item.company_number | upper }}</td>
+                        <td>{{ user_item.username | upper }}</td>
                         <td>
-                            <!--<a class="btn btn-success btn-add-admin" href="{{url_for('delete_assigned_section',id=item.admin_id)}}">
-                            <i class="fas fa-trash-alt me-2"></i>Delete
-                        </a>-->
-                    </td>
+                            {% if user_item.role_obj %}
+                                <span class="badge bg-primary">{{ user_item.role_obj.display_name }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ user_item.role | upper }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_item.is_active %}
+                                <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times-circle"></i> Inactive</span>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">
-                        <i class="fas fa-exclamation-circle me-2"></i>There are no Administrators registered.
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-    <br>
-    <hr>
-    <div class="table-responsive">
-        <h4>Checklists</h4>
-        <table class="table table-bordered table-striped mt-4">
+            </tbody>
+        </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No department assignments found. Users need to be assigned to departments.
+        </div>
+    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklists Section -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Checklists</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+        <table class="table table-hover table-striped">
             <thead class="table-dark">
                 <tr>
                     <th>#</th>
@@ -213,17 +436,29 @@
                                 {% endfor %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ url_for('delete_checklist', id=item.id) }}" class="btn btn-dark btn-sm">
-                                    <i class="fas fa-user-minus me-1"></i>DELETE
+                                <a href="{{ url_for('delete_checklist', id=item.id) }}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt me-1"></i>DELETE
                                 </a>
                             </td>
                         </tr>
                     {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">
+                            <i class="fas fa-info-circle me-2"></i>No checklists available.
+                        </td>
+                    </tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    </div>
+    </div>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -236,9 +471,95 @@
           setTimeout(() => flashMessage.remove(), 500);  // Remove from DOM after fading out
         }
       }, 4000); // 4000ms = 4 seconds
+      
       function confirmDelete() {
         return confirm("Are you sure you want to delete this item? This action cannot be undone.");
-    }
+      }
+      
+      // Mobile Sidebar Toggle
+      document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+          document.getElementById('sidebar').classList.toggle('show');
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+          const sidebar = document.getElementById('sidebar');
+          const toggle = document.getElementById('sidebarToggle');
+          const isClickInside = sidebar?.contains(event.target) || toggle?.contains(event.target);
+          
+          if (!isClickInside && sidebar?.classList.contains('show')) {
+              sidebar.classList.remove('show');
+          }
+      });
     </script>
+    
+    <style>
+    .role-hierarchy-tree {
+        padding: 15px;
+    }
+    
+    .role-node {
+        margin: 10px 0;
+        padding: 12px;
+        border-left: 4px solid #797206;
+        background: #f4f6f6;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .role-node:hover {
+        background: #e8f1f2;
+        border-left-color: #223D3C;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .role-node-children {
+        margin-left: 25px;
+        margin-top: 10px;
+        padding-left: 15px;
+        border-left: 2px dashed #dee2e6;
+    }
+    
+    .role-level-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 600;
+        background: linear-gradient(135deg, #223D3C 0%, #797206 100%);
+        color: #fff;
+    }
+    
+    .role-name {
+        font-weight: 600;
+        color: #223D3C;
+        font-size: 1.1em;
+    }
+    
+    .role-users-count {
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+    
+    .role-system-badge {
+        background: #797206;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+    
+    .role-inactive-badge {
+        background: #6c757d;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75em;
+    }
+    </style>
+
+    </main>
+</div>
+
 </body>
 </html>

@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Roles{% endblock %}
+
+{% macro render_role_tree(role, all_roles) %}
+<div class="role-node">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <!-- Removed Level badge -->
+            <span class="role-name ms-2">{{ role.display_name }}</span>
+            {% if role.is_system_role %}
+                <span class="role-system-badge ms-2">SYSTEM</span>
+            {% endif %}
+            {% if not role.is_active %}
+                <span class="role-inactive-badge ms-2">INACTIVE</span>
+            {% endif %}
+        </div>
+        <div>
+            <span class="role-users-count">
+                <i class="fas fa-users"></i> {{ role.user_count }} users
+            </span>
+        </div>
+    </div>
+    {% if role.description %}
+        <small class="text-muted d-block mt-1">{{ role.description }}</small>
+    {% endif %}
+    
+    <!-- Render child roles -->
+    <div class="role-node-children">
+        {% for child in all_roles %}
+            {% if child.parent_role_id == role.id %}
+                {{ render_role_tree(child, all_roles) }}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<style>
+    body {
+        overflow-x: hidden;
+    }
+    #sidebar {
+        min-height: 100vh;
+        background: #212529;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    #sidebar .nav-link {
+        color: #e0e0e0;
+        padding: 15px 20px;
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    #sidebar .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        border-left-color: #198754;
+        color: #fff;
+    }
+    #sidebar .nav-link.active {
+        background: rgba(255,255,255,0.15);
+        border-left-color: #0d6efd;
+        color: #fff;
+    }
+    #sidebar .nav-link i {
+        width: 25px;
+        margin-right: 10px;
+    }
+    .sidebar-header {
+        padding: 20px;
+        background: rgba(0,0,0,0.2);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-header img {
+        filter: brightness(1.2);
+    }
+    .sidebar-toggle {
+        display: none;
+    }
+    @media (max-width: 768px) {
+        #sidebar {
+            position: fixed;
+            left: -250px;
+            width: 250px;
+            z-index: 1000;
+            transition: left 0.3s ease;
+        }
+        #sidebar.show {
+            left: 0;
+        }
+        .sidebar-toggle {
+            display: inline-block;
+        }
+        #content {
+            margin-left: 0 !important;
+        }
+    }
+    .content-header {
+        background: linear-gradient(to right, #2e3939, #223D3C);
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-left: 8px solid #797206;
+    }
+    
+    /* Role hierarchy styles from superAdmin.html */
+    .role-hierarchy-tree, .role-tree {
+        padding: 15px;
+    }
+    
+    .role-node {
+        margin: 10px 0;
+        padding: 12px;
+        border-left: 4px solid #797206;
+        background: #f4f6f6;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .role-node:hover {
+        background: #e8f1f2;
+        border-left-color: #223D3C;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .role-node-children {
+        margin-left: 25px;
+        margin-top: 10px;
+        padding-left: 15px;
+        border-left: 2px dashed #dee2e6;
+    }
+    
+    /* Removed .role-level-badge style */
+    
+    .role-name {
+        font-weight: 600;
+        color: #223D3C;
+        font-size: 1.1em;
+    }
+    
+    .role-users-count {
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+    
+    .role-system-badge {
+        background: #797206;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75em;
+        font-weight: 600;
+    }
+    
+    .role-inactive-badge {
+        background: #6c757d;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75em;
+    }
+</style>
+
+<!-- Top Navbar (Mobile Toggle) -->
+<nav class="navbar navbar-dark bg-dark d-md-none">
+    <div class="container-fluid">
+        <button class="btn btn-dark sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="navbar-brand mb-0">RAND REFINERY</span>
+    </div>
+</nav>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block">
+        <div class="sidebar-header text-center">
+            <img src="/static/images/2.png" width="60px" class="mb-2" />
+            <h6 class="text-white mb-0">RAND REFINERY</h6>
+            <small class="text-muted">Super Admin Panel</small>
+        </div>
+        <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('register') }}">
+                        <i class="fas fa-tachometer-alt"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('manage_roles') }}">
+                        <i class="fas fa-user-shield"></i>Manage Roles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_users') }}">
+                        <i class="fas fa-users"></i>Manage Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('submit_location') }}">
+                        <i class="fas fa-map-marker-alt"></i>Add Location
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                        <i class="fas fa-right-from-bracket"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="content-header">
+            <h2 class="mb-0"><i class="fas fa-user-shield me-2"></i>Role Management</h2>
+            <p class="mb-0 mt-2">Create, edit, and manage role hierarchies for your organization</p>
+        </div>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Create New Role Button -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createRoleModal">
+            <i class="fas fa-plus me-2"></i>Create New Role
+        </button>
+    </div>
+    
+    <!-- Role Hierarchy Tree -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+            <h5 class="mb-0"><i class="fas fa-sitemap me-2"></i>Role Hierarchy</h5>
+        </div>
+        <div class="card-body">
+            <div class="role-tree">
+                {% if roles %}
+                    {% for role in roles %}
+                        {% if not role.parent_role_id %}
+                            {{ render_role_tree(role, all_roles) }}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No roles configured</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Roles Table -->
+    <div class="card shadow-sm">
+        <div class="card-header" style="background:linear-gradient(to right, #2e3939, #223D3C); color:#fff; border-left: 8px solid #797206;">
+            <h5 class="mb-0"><i class="fas fa-users me-2"></i>All Roles</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <!-- Removed Level column header -->
+                            <th>Name</th>
+                            <th>Display Name</th>
+                            <th>Parent Role</th>
+                            <th>Users</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                </thead>
+                <tbody>
+                    {% for role in roles %}
+                    <tr>
+                        <!-- Removed Level column -->
+                        <td><code>{{ role.name }}</code></td>
+                        <td><strong>{{ role.display_name }}</strong></td>
+                        <td>
+                            {% if role.parent_role %}
+                                <span class="badge bg-secondary">{{ role.parent_role }}</span>
+                            {% else %}
+                                <em class="text-muted">Top Level</em>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                <i class="fas fa-users"></i> {{ role.user_count }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if role.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> Active
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-times-circle"></i> Inactive
+                                </span>
+                            {% endif %}
+                            {% if role.is_system_role %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-lock"></i> System
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewRole({{ role.id }})" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="editRole({{ role.id }})" title="Edit Role">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            {% if not role.is_system_role and role.user_count == 0 %}
+                            <button class="btn btn-sm btn-danger" onclick="deleteRole({{ role.id }})" title="Delete Role">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+<!-- Create Role Modal -->
+<div class="modal fade" id="createRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('create_role') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Role Name (system name) *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="e.g., team_leader" pattern="[a-z_]+" 
+                               title="Lowercase letters and underscores only">
+                        <small class="form-text text-muted">Lowercase letters and underscores only</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Display Name *</label>
+                        <input type="text" class="form-control" name="display_name" required 
+                               placeholder="e.g., Team Leader">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" name="description" rows="3" 
+                                  placeholder="Describe this role's responsibilities"></textarea>
+                    </div>
+                    
+                    <!-- Removed Level input from create form -->
+                    
+                    <div class="form-group">
+                        <label>Parent Role</label>
+                        <select class="form-control" name="parent_role_id">
+                            <option value="">None (Top Level)</option>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}">{{ role.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Select parent role to create hierarchy</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Permissions</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="view_users" id="perm_view_users">
+                                    <label class="form-check-label" for="perm_view_users">View Users</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_users" id="perm_manage_users">
+                                    <label class="form-check-label" for="perm_manage_users">Manage Users</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="view_departments" id="perm_view_departments">
+                                    <label class="form-check-label" for="perm_view_departments">View Departments</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_departments" id="perm_manage_departments">
+                                    <label class="form-check-label" for="perm_manage_departments">Manage Departments</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="view_questions" id="perm_view_questions">
+                                    <label class="form-check-label" for="perm_view_questions">View Questions</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_questions" id="perm_manage_questions">
+                                    <label class="form-check-label" for="perm_manage_questions">Manage Questions</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="view_checklists" id="perm_view_checklists">
+                                    <label class="form-check-label" for="perm_view_checklists">View Checklists</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_checklists" id="perm_manage_checklists">
+                                    <label class="form-check-label" for="perm_manage_checklists">Manage Checklists</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Role Modal -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form method="POST" id="editRoleForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="editRoleContent">
+                    <!-- Content loaded via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Role Modal -->
+<div class="modal fade" id="viewRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Role Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewRoleContent">
+                <!-- Content loaded via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.role-tree {
+    padding: 20px;
+}
+.role-node {
+    margin-left: 30px;
+    margin-top: 10px;
+    padding: 10px;
+    border-left: 2px solid #007bff;
+}
+.role-item {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.role-item:hover {
+    background: #e9ecef;
+}
+</style>
+
+<script>
+function viewRole(roleId) {
+    fetch(`/api/role/${roleId}`)
+        .then(response => response.json())
+        .then(data => {
+            let content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> ${data.name}</p>
+                        <p><strong>Display Name:</strong> ${data.display_name}</p>
+                        <!-- Removed Level from view modal -->
+                        <p><strong>Parent Role:</strong> ${data.parent_role || 'None'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> ${data.is_active ? 'Active' : 'Inactive'}</p>
+                        <p><strong>System Role:</strong> ${data.is_system_role ? 'Yes' : 'No'}</p>
+                        <p><strong>Users:</strong> ${data.user_count}</p>
+                        <p><strong>Child Roles:</strong> ${data.child_roles_count}</p>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <strong>Description:</strong>
+                    <p>${data.description || 'No description'}</p>
+                </div>
+                <hr>
+                <div>
+                    <strong>Permissions:</strong>
+                    <ul>
+                        ${Object.keys(data.permissions).map(key => 
+                            data.permissions[key] ? `<li>${key.replace(/_/g, ' ')}</li>` : ''
+                        ).join('')}
+                    </ul>
+                </div>
+            `;
+            document.getElementById('viewRoleContent').innerHTML = content;
+            $('#viewRoleModal').modal('show');
+        });
+}
+
+function editRole(roleId) {
+    fetch(`/api/role/${roleId}`)
+        .then(response => response.json())
+        .then(data => {
+            let permissionsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="view_users" ${data.permissions.view_users ? 'checked' : ''}>
+                            <label class="form-check-label">View Users</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_users" ${data.permissions.manage_users ? 'checked' : ''}>
+                            <label class="form-check-label">Manage Users</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="view_departments" ${data.permissions.view_departments ? 'checked' : ''}>
+                            <label class="form-check-label">View Departments</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_departments" ${data.permissions.manage_departments ? 'checked' : ''}>
+                            <label class="form-check-label">Manage Departments</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="view_questions" ${data.permissions.view_questions ? 'checked' : ''}>
+                            <label class="form-check-label">View Questions</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_questions" ${data.permissions.manage_questions ? 'checked' : ''}>
+                            <label class="form-check-label">Manage Questions</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="view_checklists" ${data.permissions.view_checklists ? 'checked' : ''}>
+                            <label class="form-check-label">View Checklists</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="permissions[]" value="manage_checklists" ${data.permissions.manage_checklists ? 'checked' : ''}>
+                            <label class="form-check-label">Manage Checklists</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            let content = `
+                <input type="hidden" name="role_id" value="${data.id}">
+                <div class="form-group">
+                    <label>Display Name *</label>
+                    <input type="text" class="form-control" name="display_name" required value="${data.display_name}">
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" name="description" rows="3">${data.description || ''}</textarea>
+                </div>
+                
+                <!-- Removed Level input from edit form -->
+                
+                <div class="form-group">
+                    <label>Parent Role</label>
+                    <select class="form-control" name="parent_role_id">
+                        <option value="">None (Top Level)</option>
+                        ${window.allRoles.filter(r => r.id != data.id).map(r => 
+                            `<option value="${r.id}" ${r.id == data.parent_role_id ? 'selected' : ''}>${r.display_name}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" name="is_active">
+                        <option value="1" ${data.is_active ? 'selected' : ''}>Active</option>
+                        <option value="0" ${!data.is_active ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Permissions</label>
+                    ${permissionsHtml}
+                </div>
+            `;
+            
+            document.getElementById('editRoleContent').innerHTML = content;
+            document.getElementById('editRoleForm').action = `/update_role/${data.id}`;
+            $('#editRoleModal').modal('show');
+        });
+}
+
+function deleteRole(roleId) {
+    if (confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
+        fetch(`/delete_role/${roleId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Error deleting role');
+            }
+        });
+    }
+}
+
+// Store all roles for edit modal
+window.allRoles = {{ roles | tojson }};
+
+// Mobile Sidebar Toggle
+document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('show');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebarToggle');
+    const isClickInside = sidebar?.contains(event.target) || toggle?.contains(event.target);
+    
+    if (!isClickInside && sidebar?.classList.contains('show')) {
+        sidebar.classList.remove('show');
+    }
+});
+</script>
+
+    </main>
+</div>
+
+{% endblock %}
